@@ -18,19 +18,27 @@ class Dispatch
 
     public function controller()
     {
-        list($controller, $method, $params) = $this->route();
-        if(class_exists($controller) && method_exists($controller, $method)){
-            $controller = new $controller();
-            if($params)
-                call_user_func_array(array($controller, $method), $params);
-            else
-                $controller->$method();
+        session_start();
+        headers_sent() OR header('Content-Type: text/html; charset=utf-8');
 
-            // Return the controller instance
-            return $controller;
-        }else{
-            echo '404';
-        }
+        list($controller, $method, $params) = $this->route();
+
+        $controller = new $controller();
+        $controller->initialize($method);
+
+        if($params)
+            call_user_func_array(array($controller, $method), $params);
+        else
+            $controller->$method();
+
+        if(\Tiny\Config::config()->debug)
+            \Tiny\Debug::Detail(
+                array(
+                    array('name' => 'Controller', 'value' => $controller),
+                    array('name' => 'Method', 'value' => $method),
+                    array('name' => 'params', 'value' => $params),
+                )
+            );
     }
 
     /**
