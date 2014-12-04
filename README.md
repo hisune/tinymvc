@@ -5,7 +5,7 @@ Hisune Tiny MVC Framework
 
 安装方法
 =========
-* 下载`composer.json`到任意目录，cd到composer.json所在目录，执行`composer install`
+* 下载`composer.json`到任意目录，`cd`到`composer.json`所在目录，执行`composer install`
 * composer帮助：(https://getcomposer.org)
 
 通用配置
