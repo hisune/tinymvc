@@ -1,9 +1,9 @@
 {
     "name": "tiny/tiny",
     "type": "library",
-    "keywords": ["tinyframework"],
+    "keywords": ["tiny framework", "tiny MVC", "hisune"],
     "license": "MIT",
-    "description": "The TinyMVC Framework Libraries",
+    "description": "The Tiny MVC Framework Libraries",
     "authors": [
         {
             "name": "Hisune",
