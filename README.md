@@ -125,7 +125,7 @@ Theme Builder介绍
 > daterangepicker     https://github.com/dangrossman/bootstrap-daterangepicker  
 > multiselect         https://github.com/davidstutz/bootstrap-multiselect
 
-* 怎么使用？
+* 怎么使用？  
 Controller中加入action成员属性，例如：
 ```php
 　　protected $actionTabs = array(
@@ -218,114 +218,114 @@ column: 内容数组，包括显示字段配置及过滤配置，必须
 
 * datatables完整配置示例：
 ```php
-    public static function getDataTablesSetting()
-    {
-        return array(
-            'id' => '',
-            'js' => '',
-　　'export' => true,
-　　'page' => 25,
-　　'title' => '',
-            'default' => array(
-                'filter' => 'i.select > 0', // 默认过滤参数
-                'group' => '',
-                'having' => '',
+public static function getDataTablesSetting()
+{
+    return array(
+        'id' => '',
+        'js' => '',
+        'export' => true,
+        'page' => 25,
+        'title' => '',
+        'default' => array(
+            'filter' => 'i.select > 0', // 默认过滤参数
+            'group' => '',
+            'having' => '',
+        ),
+        'before' => 'xx',
+        'after' => 'oo',
+        'column' => array(
+            array(
+                'title' => 'hidden测试',
+                'name' => 'i.hidden',
+                'alias' => 'hidden',
+                'filter' => array(
+                    'type' => 'hidden',
+                    'call' => 'callHidden', // 当前helper中定义call函数$post, &whereStr, &$whereBind
+                ),
+                'display' => false
             ),
-　　'before' => 'xx',
-　　'after' => 'oo',
-            'column' => array(
-                array(
-                    'title' => 'hidden测试',
-                    'name' => 'i.hidden',
-                    'alias' => 'hidden',
-                    'filter' => array(
-                        'type' => 'hidden',
-                        'call' => 'callHidden', // 当前helper中定义call函数$post, &whereStr, &$whereBind
-                    ),
-　　'display' => false
+            array(
+                'title' => 'range测试',
+                'name' => 't.range',
+                'filter' => array(
+                    'type' => 'range',
+                    'width' => '50',
+                )
+            ),
+            array(
+                'title' => 'input测试',
+                'name' => 'j.input',
+                'sort' => true,
+                'filter' => array(
+                    'type' => 'input',
+                    'like' => true,
                 ),
-                array(
-                    'title' => 'range测试',
-                    'name' => 't.range',
-                    'filter' => array(
-                        'type' => 'range',
-                        'width' => '50',
-                    )
+                'call' => 'renderInput',
+            ),
+            array(
+                'title' => 'date-range',
+                'name' => 'i.date_range',
+                'filter' => array(
+                    'type' => 'date_range',
+                    'width' => '100',
                 ),
-                array(
-                    'title' => 'input测试',
-                    'name' => 'j.input',
-                    'sort' => true,
-                    'filter' => array(
-                        'type' => 'input',
-                        'like' => true,
-                    ),
-                    'call' => 'renderInput',
-                ),
-                array(
-                    'title' => 'date-range',
-                    'name' => 'i.date_range',
-                    'filter' => array(
-                        'type' => 'date_range',
-                        'width' => '100',
-                    ),
-                    'call' => 'date',
-                ),
-                array(
-                    'title' => 'date-time',
-                    'name' => 'i.date',
-                    'filter' => array(
-                        'type' => 'date',
-                    ),
-                ),
-                array(
-                    'title' => '测试',
-                    'name' => 'i.select',
-                    'sort' => 'asc',
-                    'filter' => array('type' => 'select', 'filter' => false, 'option' => array(1 => 'test1', 2 => 'test2')),
-                    'call' => 'enum',
-                    'enum' => array(1 => 'test1', 2 => 'test2'),
-                ),
-                array(
-                    'title' => '操作',
-                    'tips' => 'tips测试',
-                    'call' => 'renderTest', // 不带name的call只有一个参数，即当前结果行
+                'call' => 'date',
+            ),
+            array(
+                'title' => 'date-time',
+                'name' => 'i.date',
+                'filter' => array(
+                    'type' => 'date',
                 ),
             ),
-            'model' => 'Index',
-            'join' => array(
-                'main' => 'i',
-                'on' => array(
-                    array('type' => 'left' , 'join' => '__JOIN__ j on i.id = j.index_id'),
-                    array('type' => 'left' , 'join' => '__JOIN_TEST__ t on j.id = t.join_id'),
-                ),
+            array(
+                'title' => '测试',
+                'name' => 'i.select',
+                'sort' => 'asc',
+                'filter' => array('type' => 'select', 'filter' => false, 'option' => array(1 => 'test1', 2 => 'test2')),
+                'call' => 'enum',
+                'enum' => array(1 => 'test1', 2 => 'test2'),
             ),
-        );
-    }
+            array(
+                'title' => '操作',
+                'tips' => 'tips测试',
+                'call' => 'renderTest', // 不带name的call只有一个参数，即当前结果行
+            ),
+        ),
+        'model' => 'Index',
+        'join' => array(
+            'main' => 'i',
+            'on' => array(
+                array('type' => 'left', 'join' => '__JOIN__ j on i.id = j.index_id'),
+                array('type' => 'left', 'join' => '__JOIN_TEST__ t on j.id = t.join_id'),
+            ),
+        ),
+    );
+}
 
-    // 前置post函数，$post为查询数据
-    public static function dataTablesPostBefore(&$post)
-    {
+// 前置post函数，$post为查询数据
+public static function dataTablesPostBefore(&$post)
+{
 
-    }
+}
 
-    // 后置post函数，$msg为返回数据
-    public static function dataTablesPostAfter(&$msg)
-    {
+// 后置post函数，$msg为返回数据
+public static function dataTablesPostAfter(&$msg)
+{
 
-    }
+}
 
-    // 辅助过滤函数，$post为查询数据，$whereStr为查询语句string，$whereBind为查询语句绑定变量数组
-    public static function dataTablesFilterCallHidden($post, &$whereStr, &$whereBind)
-    {
+// 辅助过滤函数，$post为查询数据，$whereStr为查询语句string，$whereBind为查询语句绑定变量数组
+public static function dataTablesFilterCallHidden($post, &$whereStr, &$whereBind)
+{
 
-    }
+}
 
-    // 辅助输出函数，$row为当前结果行
-    public static function dataTablesShowRenderTest($row)
-    {
-        return $row->hidden;
-    }
+// 辅助输出函数，$row为当前结果行
+public static function dataTablesShowRenderTest($row)
+{
+    return $row->hidden;
+}
 　　
 ```
 About
