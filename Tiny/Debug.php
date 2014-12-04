@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by hisune.com
- * User: 446127203@qq.com
+ * User: hi@hisune.com
  * Date: 14-7-11
  * Time: 上午10:12
  */
@@ -37,18 +37,23 @@ abstract class Debug
         $return .= self::$html->tag('b', 'Memory Usage');
         $detail = self::$html->tag(
             'p',
-            $helper->roundRate(memory_get_usage() - START_MEMORY_USAGE, 1024) . ' KB',
-            array('style' => 'margin:0;padding:0;line-height:4px;')
+            $helper->roundRate(START_MEMORY_USAGE, 1024) . ' Kb (start)',
+            array('style' => 'margin:0;padding:0;line-height:14px;')
         );
         $detail .= self::$html->tag(
             'p',
-            $helper->roundRate(memory_get_usage(), 1024) . ' Kb (process)',
-            array('style' => 'margin:0;padding:0;line-height:4px;')
+            $helper->roundRate(memory_get_usage(), 1024) . ' Kb (end)',
+            array('style' => 'margin:0;padding:0;line-height:14px;')
+        );
+        $detail .= self::$html->tag(
+            'p',
+            $helper->roundRate(memory_get_usage() - START_MEMORY_USAGE, 1024) . ' KB (usage)',
+            array('style' => 'margin:0;padding:0;line-height:14px;')
         );
         $detail .= self::$html->tag(
             'p',
             $helper->roundRate(memory_get_peak_usage(TRUE), 1024) . ' Kb (process peak)',
-            array('style' => 'margin:0;padding:0;line-height:4px;')
+            array('style' => 'margin:0;padding:0;line-height:14px;')
         );
         $return .= self::$html->tag('pre', $detail);
 
@@ -60,7 +65,7 @@ abstract class Debug
         $return = self::$html->tag('b', 'Execution Time');
         $return .= self::$html->tag(
             'pre',
-            round((microtime(true) - START_TIME), 5) .' seconds'
+            round((microtime(true) - START_TIME), 5) * 1000 .' ms'
         );
 
         return $return;
@@ -76,7 +81,9 @@ abstract class Debug
                 $return .= self::$html->tag('p', $detail['value']);
             }elseif(is_array($detail['value'])){
                 ob_start();
+                echo '<pre>';
                 var_dump($detail['value']);
+                echo '</pre>';
                 $dump = ob_get_clean();
                 $return .= self::$html->tag('p', $dump);
             }
@@ -111,9 +118,10 @@ abstract class Debug
         if(!empty($name)) {
             $return .= self::$html->tag('b', $info);
             ob_start();
+            echo '<pre>';
             var_dump($name);
-            $dump = ob_get_clean();
-            $return .= self::$html->tag('pre', $dump);
+            echo '</pre>';
+            $return .= ob_get_clean();
         }
 
         return $return;
@@ -126,7 +134,7 @@ abstract class Debug
 
         $return .= self::$html->tag('b', count($included_files) . ' PHP Files Included:');
         $files = '';
-        foreach($included_files as $file) $files .= self::$html->tag('p', $file, array('style' => 'margin:0;padding:0;line-height:4px;'));
+        foreach($included_files as $file) $files .= self::$html->tag('p', $file, array('style' => 'margin:0;padding:0;line-height:14px;'));
         $return .= self::$html->tag('pre', $files);
 
         return $return;

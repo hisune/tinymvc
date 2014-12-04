@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by hisune.com
- * User: 446127203@qq.com
+ * User: hi@hisune.com
  * Date: 14-7-11
  * Time: 上午10:13
  */
@@ -14,15 +14,15 @@ class Html
      * Create a gravatar <img> tag
      *
      * @param $email the users email address
-     * @param $size	the size of the image
+     * @param $size    the size of the image
      * @param $alt the alt text
      * @param $type the default image type to show
      * @param $rating max image rating allowed
      * @return string
      */
-    public static function gravatar($email = '', $size = 80, $alt = 'Gravatar', $type = 'wavatar', $rating = 'g')
+    public static function gravatar($email = '', $class = '', $size = 80, $alt = 'Gravatar', $type = 'wavatar', $rating = 'g')
     {
-        return '<img src="http://www.gravatar.com/avatar/' . md5($email) . "?s=$size&d=$type&r=$rating\" alt=\"$alt\" />";
+        return '<img class="' . $class . '" src="http://www.gravatar.com/avatar/' . md5($email) . "?s=$size&d=$type&r=$rating\" alt=\"$alt\" />";
     }
 
 
@@ -35,22 +35,20 @@ class Html
      */
     public static function attributes(array $attributes = NULL)
     {
-        if( ! $attributes) return;
+        if (!$attributes) return;
 
         asort($attributes);
         $h = '';
-        foreach($attributes as $k => $v)
-        {
+        foreach ($attributes as $k => $v) {
             $h .= " $k=\"" . self::h($v) . '"';
         }
         return $h;
     }
 
-    public static  function h($string)
+    public static function h($string)
     {
         return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
     }
-
 
     /**
      * Create an HTML tag
@@ -62,28 +60,9 @@ class Html
      */
     public static function tag($tag, $text = '', array $attributes = NULL)
     {
-        return"\n<$tag" . self::attributes($attributes) . ($text === 0 ? ' />' : ">$text</$tag>");
+        $autoClose = array('input', 'br', 'hr', 'img', 'col', 'area', 'base', 'link', 'meta', 'frame', 'param');
+        return "<$tag" . self::attributes($attributes) . (in_array($tag, $autoClose) ? ' />' : ">$text</$tag>");
     }
-
-
-    /**
-     * Create an HTML Link
-     *
-     * @param string $url for the link
-     * @param string $text the link text
-     * @param array $attributes of additional tag settings
-     * @return string
-     */
-    public static function link($url, $text = '', array $attributes = NULL)
-    {
-        if( ! $attributes)
-        {
-            $attributes = array();
-        }
-
-        return self::tag('a', $text, $attributes + array('href' => site_url($url)));
-    }
-
 
     /**
      * Auto creates a form select dropdown from the options given .
@@ -97,25 +76,75 @@ class Html
     public static function select($name, array $options, $selected = NULL, array $attributes = NULL)
     {
         $h = '';
-        foreach($options as $k => $v)
-        {
+        foreach ($options as $k => $v) {
             $a = array('value' => $k);
 
             // Is this element one of the selected options?
-            if($selected AND in_array($k, (array)$selected))
-            {
+            if ($selected AND in_array($k, (array)$selected)) {
                 $a['selected'] = 'selected';
             }
 
             $h .= self::tag('option', $v, $a);
         }
 
-        if( ! $attributes)
-        {
+        if (!$attributes) {
             $attributes = array();
         }
 
-        return self::tag('select', $h, $attributes+array('name' => $name));
+        return self::tag('select', $h, $attributes + array('name' => $name));
+    }
+
+    public static function loading()
+    {
+        $html = self::tag(
+            'div',
+            '',
+            array(
+                'class'         => 'progress-bar',
+                'role'          => 'progressbar',
+                'aria-valuenow' => '100',
+                'aria-valuemin' => '0',
+                'aria-valuemax' => '100',
+                'style'         => 'width: 100%',
+            )
+        );
+        $html = self::tag(
+            'div',
+            $html,
+            array(
+                'class' => 'progress progress-striped active',
+                'style' => 'margin:15px 50px',
+            )
+        );
+        $html .= self::tag(
+            'p',
+            '正在努力加载页面 o(>﹏<)o',
+            array(
+                'style' => 'margin-top: 12px'
+            )
+        );
+        $html = self::tag(
+            'div',
+            $html,
+            array(
+                'class' => 'alert alert-info width-350 text-center',
+            )
+        );
+
+        return $html;
+    }
+
+    // success, info, warning, danger
+    public static function alert($msg, $alert = 'danger')
+    {
+        return self::tag(
+            'div',
+            $msg,
+            array(
+                'class' => 'alert alert-' . $alert,
+                'role'  => 'alert',
+            )
+        );
     }
 
 }

@@ -1,9 +1,11 @@
 <?php
 /**
  * Created by hisune.com
- * User: 446127203@qq.com
+ * User: hi@hisune.com
  * Date: 14-7-11
  * Time: 下午4:06
+ *
+ * from micromvc
  */
 namespace Tiny;
 
@@ -44,10 +46,11 @@ class Cookie
     /**
      * Called before any output is sent to create an encrypted cookie with the given value.
      *
-     * @param string $key cookie name
+     * @param $name
      * @param mixed $value to save
      * @param array $config settings
      * return boolean
+     * @internal param string $key cookie name
      */
     public static function set($name, $value, $config = NULL)
     {
