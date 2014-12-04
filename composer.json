@@ -11,7 +11,8 @@
         }
     ],
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "tiny/tiny": "*"
     },
     "autoload": {
         "psr-0": {
