@@ -2,11 +2,18 @@ Hisune Tiny MVC Framework
 =========
 * 简约为原则的高性能框架，包含：路由，简单权限验证，cookie，session，ORM，view，validation，cache等等。
 * Author: Hisune(http://hisune.com)
+* 示例程序：https://github.com/hisune/tinymvc-demo
+* 示例网站：http://hisune.com
 
 安装方法
 =========
 * 下载`composer.json`到任意目录，`cd`到`composer.json`所在目录，执行`composer install`
 * composer帮助：(https://getcomposer.org)
+> linux：  
+> `curl -sS https://getcomposer.org/installer | php`  
+> `mv composer.phar /usr/local/bin/composer`  
+> windows:  
+> https://getcomposer.org/Composer-Setup.exe
 
 通用配置
 ========
@@ -74,12 +81,9 @@ ORM介绍
  $orders = new \Model\Orders;
  $orders
      ->alias('o') // 或者用 ->table('__ORDERS__ o')
-     ->field('o.order, o.id'))
+     ->field('o.order, o.id')
      ->order('? desc', array('o.id'))
-     ->where('o.id = ? or o.order = "?"',array("5' and 1=2 union select * from user where id=1/*")) //
-```
-* 注入测试
-```php
+     ->where('o.id = ? or o.order = "?"',array("5' and 1=2 union select * from user where id=1/*")) //注入测试
      ->limit('1/*,1') // limit强制整型测试
      ->join('__TEST__ t on t.id = o.test_id', 'left')
      ->group('?', array('o.order'))
@@ -94,7 +98,7 @@ ORM介绍
  delete([int $id], [boolean $all]) // D，慎用all
  query(string $sql, [array $param], [boolean $fetchAll])
  execute(string $sql, [array $param])
- ```
+```
 * 单列数据统计方法，多列或其他复杂情况用field：
 ```php
  count([string $column])
