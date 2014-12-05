@@ -1,6 +1,6 @@
 Hisune Tiny MVC Framework
 =========
-* 简约为原则的高性能框架，包含：路由，简单权限验证，cookie，session，ORM，view，validation，cache等等。
+* 简约为原则的高性能框架，包含：路由，ORM，cookie，session，view，validation，简单权限验证，cache等等。
 * Author: Hisune(http://hisune.com)
 * 示例程序：https://github.com/hisune/tinymvc-demo
 * 示例网站：http://hisune.com
@@ -14,6 +14,12 @@ Hisune Tiny MVC Framework
 > `mv composer.phar /usr/local/bin/composer`  
 > windows:  
 > https://getcomposer.org/Composer-Setup.exe
+
+系统环境
+=========
+* Composer
+* PHP 5.3+
+* PDO extension
 
 通用配置
 ========
@@ -78,7 +84,7 @@ ORM介绍
 
 * select使用方法(find)：
 ```php
- $orders = new \Model\Orders;
+ $orders = new model\Orders;
  $orders
      ->alias('o') // 或者用 ->table('__ORDERS__ o')
      ->field('o.order, o.id')
