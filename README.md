@@ -21,6 +21,18 @@ Hisune Tiny MVC Framework
 * PHP 5.3+
 * PDO extension
 
+必须的参数配置
+========
+* 可参考https://github.com/hisune/tinymvc-demo中的app/Demo/bootstrap/autoload.php
+```php
+\Tiny\Config::$application = 'demo';
+\Tiny\Config::$configDir = __DIR__ . '/../config/';
+\Tiny\Config::$varDir = __DIR__ . '/../var/';
+\Tiny\Config::$viewDir = __DIR__ . '/../view/';
+\Tiny\Config::$controller = array('Controller', 'app/Controller');
+register_shutdown_function(array('\Tiny\Exception', 'fatal'));
+```
+
 通用配置
 ========
 * config.php配置举例：
