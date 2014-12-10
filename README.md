@@ -23,7 +23,7 @@ Hisune Tiny MVC Framework
 
 必须的参数配置
 ========
-* 可参考https://github.com/hisune/tinymvc-demo中的app/Demo/bootstrap/autoload.php
+* 可参考 https://github.com/hisune/tinymvc-demo 中的 `app/Demo/bootstrap/autoload.php`
 ```php
 \Tiny\Config::$application = 'demo';
 \Tiny\Config::$configDir = __DIR__ . '/../config/';
