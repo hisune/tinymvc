@@ -115,7 +115,7 @@ class View
 
     public static function publicDir()
     {
-        return dirname($_SERVER['SCRIPT_NAME']);
+        return '//' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']);
     }
 
     public static function script($name, $cdn = false, $dir = 'asset')
