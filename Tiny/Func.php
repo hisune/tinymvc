@@ -11,6 +11,24 @@ namespace Tiny;
 
 class Func
 {
+    public static function humanTime($time)
+    {
+        if(!is_numeric($time))
+            $time = strtotime($time);
+
+        $diff = time() - $time;
+        if($diff < 60)
+            return $diff . '秒前';
+        elseif($diff < 3600)
+            return floor($diff / 60) . '分钟前';
+        elseif($diff < 86400)
+            return floor($diff / 3600) . '小时前';
+        elseif($diff < 432000)
+            return floor($diff / 86400) . '天前';
+        else
+            return date('Y-m-d H:i:s', $time);
+    }
+
     public static function echoJson($ret, $msg = null, $exit = true)
     {
         $array['ret'] = (int)$ret;

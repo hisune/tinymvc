@@ -256,7 +256,6 @@ class DataTables implements tiny\ThemeBuilder
 
         // 9. find结果集
         $msg['rows'] = $model->find();
-//        echo $model->getLastSql();
 
         // 10。处理结果集
         if($msg['rows']){

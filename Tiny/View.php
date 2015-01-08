@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 14-7-10
  * Time: 下午5:35
@@ -84,14 +84,14 @@ class View
     {
         if (Config::config()->token) {
             if (strpos($content, '{__TOKEN__}'))
-                $content = str_replace('{__TOKEN__}', $this->buildToken(), $content); // 指定表单令牌隐藏域位置
+                $content = str_replace('{__TOKEN__}', $this->_buildToken(), $content); // 指定表单令牌隐藏域位置
             elseif (preg_match('/<\/form(\s*)>/is', $content, $match))
-                $content = str_replace($match[0], $this->buildToken() . $match[0], $content); // 智能生成表单令牌隐藏域
+                $content = str_replace($match[0], $this->_buildToken() . $match[0], $content); // 智能生成表单令牌隐藏域
         }
     }
 
     // 创建表单令牌
-    private function buildToken()
+    private function _buildToken()
     {
         if (!Session::get($this->tokenName))
             Session::set($this->tokenName, array());
@@ -143,12 +143,12 @@ class View
         );
     }
 
-    private static function srcUri($name, $cdn, $dir)
+    public static function srcUri($name, $cdn = false, $dir = 'asset')
     {
         return $cdn ? $name : self::assetsUrl($name, $dir);
     }
 
-    private static function assetsUrl($name, $dir)
+    public static function assetsUrl($name, $dir = 'asset')
     {
         return self::publicDir() . '/' . $dir . '/' . $name;
     }
