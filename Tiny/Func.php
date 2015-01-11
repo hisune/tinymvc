@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com.
+ * Created by hisune.com
  * User: hi@hisune.com
  * Date: 2014/10/9 0009
  * Time: 下午 7:37
@@ -23,7 +23,7 @@ class Func
             return floor($diff / 60) . '分钟前';
         elseif($diff < 86400)
             return floor($diff / 3600) . '小时前';
-        elseif($diff < 432000)
+        elseif($diff < 864000)
             return floor($diff / 86400) . '天前';
         else
             return date('Y-m-d H:i:s', $time);

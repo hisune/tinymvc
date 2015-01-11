@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com.
+ * Created by hisune.com
  * User: hi@hisune.com
  * Date: 14-7-11
  * Time: 上午9:58

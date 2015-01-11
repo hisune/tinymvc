@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com.
+ * Created by hisune.com
  * User: hi@hisune.com
  * Date: 14-7-31
  * Time: 下午3:40
@@ -98,6 +98,11 @@ class ORM
     public function __set($key, $value)
     {
         $this->data[$this->_parseName($key)] = $value;
+    }
+
+    public function __get($key)
+    {
+        return isset($this->data[$key]) ? $this->data[$key] : null;
     }
 
     private function _setTableName()
