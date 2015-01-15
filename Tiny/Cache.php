@@ -122,8 +122,8 @@ class Cache
     protected function _file($id)
     {
         $instance = self::getInstance();
-        $fileNmae = $instance->_idToFileName($id);
-        return $instance->_options['cache_dir'] . $fileNmae;
+        $fileName = $instance->_idToFileName($id);
+        return $instance->_options['cache_dir'] . $fileName;
     }
 
     /**
