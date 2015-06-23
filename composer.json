@@ -1,6 +1,6 @@
 {
-    "name": "hisune/tinvmvc",
-    "keywords": ["tiny framework", "tiny MVC", "hisune"],
+    "name": "hisune/tinymvc",
+    "keywords": ["tiny MVC", "tiny framework", "hisune"],
     "license": "MIT",
     "description": "The Tiny MVC Framework Libraries",
     "require": {
