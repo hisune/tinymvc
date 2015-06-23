@@ -16,7 +16,9 @@ class Mod implements tiny\ThemeBuilder
     public $html = ''; // html内容
     private $js = '';
     private $pkId = null; // model pk id
+    private $helper = false; //helper
     private $model = false; // model
+    private $post = array();
     private $data = array(); // model data
     private $defaultSingleSelect = array( // 默认的single select配置
         'enableFiltering' => false,
@@ -50,32 +52,55 @@ class Mod implements tiny\ThemeBuilder
     public function build()
     {
         if($this->setting && isset($this->setting['mod'])){
-            // 组装html
-            $this->_renderHtml();
-            // 输出html
-            $this->_show();
+            if(isset($this->setting['js']) && $this->setting['js']){
+                $this->js = $this->setting['js'];
+            }
+            foreach($this->setting['mod'] as $k => $v){
+                $this->setting['mod'][$v['name']] = $v;
+                unset($this->setting['mod'][$k]);
+            }
+            $this->_renderModel();
+            if(tiny\Request::isPost()){
+                $this->post = tiny\Request::post();
+                $this->_renderPost();
+            }else{
+                // 组装html
+                $this->_renderHtml();
+                // 输出html
+                $this->_show();
+            }
         }else
             echo 'mod setting error';
     }
 
-    private function _renderHtml()
+    private function _renderModel()
     {
         // model相关
-        $this->pkId = tiny\Request::get('id');
-        if($this->pkId) {
-            $this->model =
-                isset($this->setting['model']) ?
-                    ucfirst(\Tiny\Config::$application) . '\\Model\\' . ucfirst($this->setting['model']) :
-                    str_replace('\\Controller\\', '\\Model\\', \Tiny\Request::$controller);
-            if(!class_exists($this->model))
-                exit('mod model not exists');
-            $this->model = new $this->model;
-            $this->data = $this->model->findOne($this->pkId);
+        $model =
+            isset($this->setting['model']) ?
+                ucfirst(\Tiny\Config::$application) . '\\Model\\' . ucfirst($this->setting['model']) :
+                str_replace('\\Controller\\', '\\Model\\', \Tiny\Request::$controller);
+        if(class_exists($model)) {
+            $this->model = new $model;
+        }
+        $this->helper = str_replace('\\Controller\\', '\\Helper\\', \Tiny\Request::$controller);
+    }
 
-            $helper = str_replace('\\Controller\\', '\\Helper\\', \Tiny\Request::$controller);
+    private function _renderHtml()
+    {
+
+        if($this->model){
+            $pk = $this->model->key;
+        }else
+            $pk = 'id';
+
+        $this->pkId = tiny\Request::get($pk);
+        if($this->pkId) {
+            $this->data = (object)$this->model->findOne($this->pkId);
+            $helper = $this->helper;
             // 是否有前置处理函数
-            $call = lcfirst($this->action) . 'ModBefore';
-            if(method_exists($helper, $call)){
+            $call = lcfirst($this->action) . 'ModDisplayBefore';
+            if(method_exists($this->helper, $call)){
                 $helper::$call($this->data);
             }
         }
@@ -127,7 +152,7 @@ class Mod implements tiny\ThemeBuilder
                 'method' => 'post',
                 'action' => tiny\Url::get($this->option['action']),
                 'id' => $this->id,
-                'onsubmit' => 'return modCheck();'
+                'onsubmit' => isset($this->setting['onsubmit']) ? $this->setting['onsubmit'] : 'return modCheck();'
             )
         );
     }
@@ -278,6 +303,42 @@ class Mod implements tiny\ThemeBuilder
         }
 
         return $html;
+    }
+
+    private function _renderPost()
+    {
+        // save前置函数，用来改变post值
+        $before = lcfirst($this->action) . 'ModPostBefore';
+        $helper = $this->helper;
+        if(method_exists($this->helper, $before)){
+            $helper::$before($this->post);
+        }
+        $model = $this->model;
+        $attribute = array_keys($model::attributes());
+        foreach($this->post as $k => $v){
+            if(in_array($k, $attribute)){
+                if(is_array($v)) $v = json_encode($v);
+                if($this->model->type == 'mongodb'){
+                    if(isset($this->setting['mod'][$k]['field_type'])){
+                        $v = tiny\Helper::mongoType($this->setting['mod'][$k]['field_type'], $v);
+                    }
+                }
+                $this->model->$k = $v;
+            }
+        }
+
+        if(isset($this->model->_data[$this->model->key]) && $this->model->_data[$this->model->key]){
+            $result = $this->model->update();
+        }else{
+            if(isset($this->model->_data[$this->model->key])){
+                unset($this->model->_data[$this->model->key]);
+            }
+            $result = $this->model->save();
+        }
+        if($result)
+            tiny\Error::echoJson('1', 'success');
+        else
+            tiny\Error::echoJson('1', 'save error');
     }
 
     /**

@@ -26,6 +26,7 @@ class DataTables implements tiny\ThemeBuilder
     public $url = '';
     public $action; // action名
     public $option; // option
+    public $model; // 模型名称
 
     public function __construct($action, $option)
     {
@@ -118,35 +119,105 @@ class DataTables implements tiny\ThemeBuilder
             isset($this->setting['model']) ?
                 ucfirst(\Tiny\Config::$application) . '\\Model\\' . ucfirst($this->setting['model']) :
                 str_replace('\\Controller\\', '\\Model\\', \Tiny\Request::$controller);
-        $helper = str_replace('\\Controller\\', '\\Helper\\', \Tiny\Request::$controller);
+        $this->helper = str_replace('\\Controller\\', '\\Helper\\', \Tiny\Request::$controller);
         if(!class_exists($model))
             \Tiny\Error::echoJson(0, '模型不存在: ' . $model);
-        if(!class_exists($helper))
-            \Tiny\Error::echoJson(0, '辅助类不存在: ' . $helper);
+        if(!class_exists($this->helper))
+            \Tiny\Error::echoJson(0, '辅助类不存在: ' . $this->helper);
 
         // 2. 执行helper前置函数
         $method = $this->action . 'DataTablesPostBefore';
-        if(method_exists($helper, $method))
+        if(method_exists($this->helper, $method))
             $helper::$method($this->post);
 
-        $model = new $model;
+        $this->model = new $model;
 
         // 3. 整理join参数
-        if(isset($this->setting['join'])){
-            $model->alias($this->setting['join']['main']);
-            foreach($this->setting['join']['on'] as $v){
-                $model->join($v['join'], $v['type']);
-            }
-        }
+        $call = '_renderJoin' . ucfirst($this->model->type);
+        $this->$call();
 
         // 4. 整理field, where, order参数
+        $msg['js'] = isset($this->setting['js']) ? $this->setting['js'] : '';
+        $call = '_renderNormal' . ucfirst($this->model->type);
+        $this->$call($msg);
+        if($msg['total'] == 0)
+            \Tiny\Error::echoJson(2, '好像木有数据...');
+
+        // 10。处理结果集
+        if($msg['rows']){
+            $data = array();
+            foreach($msg['rows'] as $row){
+                $tmp = array();
+                foreach($this->setting['column'] as $column){
+                    if(!$this->_displayColumn($column)) continue;
+                    if(isset($column['name'])){
+                        // 真实字段名
+                        $name = isset($column['alias']) ? $column['alias'] : $column['name'];
+                        if(isset($column['call'])){
+                            switch($column['call']){
+                                case 'date':
+                                    if($row->{$name} && $this->model->type == 'mongodb'){
+                                        $row->{$name} = $row->{$name}->sec;
+                                    }
+                                    $tmp[] = $row->{$name} ? date('Y-m-d H:i:s', $row->{$name}) : '-';
+                                    break;
+                                case 'date_short':
+                                    $tmp[] = $row->{$name} ? date('Y-m-d', $row->{$name}) : '-';
+                                    break;
+                                case 'enum':
+                                    $tmp[] = isset($column['enum'][$row->{$name}]) ? $column['enum'][$row->{$name}] : '?(' . $row->{$name}. ')';
+                                    break;
+                                case 'string':
+                                    $tmp[] = strval($row->{$name});
+                                    break;
+                                default:
+                                    $tmp[] = $this->_callShowRender($column, $this->helper, $row);
+                            }
+                        }else
+                            $tmp[] = !property_exists($row, $name) ? '-' : $row->{$name};
+                    }else
+                        $tmp[] = $this->_callShowRender($column, $this->helper, $row);
+                }
+                $data[] = $tmp;
+            }
+            $msg['rows'] = $data;
+        }
+
+
+        // 11. 执行helper后置函数
+        $method = $this->action . 'DataTablesPostAfter';
+        $helper = $this->helper;
+        if(method_exists($this->helper, $method))
+            $helper::$method($msg);
+
+        // 12. 是否是导出
+        if(isset($this->post['_export']) && $this->post['_export'])
+            tiny\Func::any2excel(array_merge(array($msg['export_title']), $data));
+        // 13. 输出结果
+        tiny\Error::echoJson(1, $msg);
+    }
+
+    private function _renderJoinMysql()
+    {
+        if(isset($this->setting['join'])){
+            $this->model->alias($this->setting['join']['main']);
+            foreach($this->setting['join']['on'] as $v){
+                $this->model->join($v['join'], $v['type']);
+            }
+        }
+    }
+
+    private function _renderJoinMongodb(){}
+
+    private function _renderNormalMysql(&$msg)
+    {
         $field = '';
         $whereStr = isset($this->setting['default']['filter']) ? $this->setting['default']['filter'] : '1=1';
         $whereBind = array();
         foreach($this->setting['column'] as $column){
             // export
             if(isset($this->post['_export']) && $this->post['_export'] && $this->_displayColumn($column))
-                $exportTitle[] = $column['title'];
+                $msg['export_title'][] = $column['title'];
             if(isset($column['name'])){
                 // order，需要放前面，不然后面会continue
                 if(isset($this->post['_sort'][$column['name']]))
@@ -161,8 +232,9 @@ class DataTables implements tiny\ThemeBuilder
                     // 执行自定义过滤函数
                     if(isset($column['filter']['call'])){
                         $call = $this->action . 'DataTablesFilter' . ucfirst($column['filter']['call']);
-                        if(!method_exists($helper, $call))
+                        if(!method_exists($this->helper, $call))
                             \Tiny\Error::echoJson(0, '辅助类中的过滤函数不存在: ' . $call);
+                        $helper = $this->helper;
                         $helper::$call($this->post, $callStr, $callBind);
                         if($callStr && $callBind){
                             $whereStr .= ' and ' . $callStr;
@@ -213,36 +285,36 @@ class DataTables implements tiny\ThemeBuilder
                 }
             }
         }
-        if($field) $model->field(rtrim($field, ','));
-        $model->where($whereStr, $whereBind);
+        if($field) $this->model->field(rtrim($field, ','));
+        $this->model->where($whereStr, $whereBind);
 
-        $options = $model->getOptions(); // count后会清楚options，这里需要先获取，后面重新赋值
+        $options = $this->model->getOptions(); // count后会清楚options，这里需要先获取，后面重新赋值
 
         // 5. 其他默认配置参数（group，having）
         if(isset($this->setting['default']['group']) && $this->setting['default']['group'])
-            $model->group($this->setting['default']['group']);
+            $this->model->group($this->setting['default']['group']);
         if(isset($this->setting['default']['having']) && $this->setting['default']['having'])
-            $model->having($this->setting['default']['having']);
-        $msg['js'] = isset($this->setting['js']) ? $this->setting['js'] : '';
+            $this->model->having($this->setting['default']['having']);
+
 
         // 6. 统计总记录数
-        $msg['total'] = $model->count();
-//        echo $model->getLastSql();
-        if($msg['total'] == 0)
-            \Tiny\Error::echoJson(2, '好像木有数据...');
+        $msg['total'] = $this->model->count();
+//        echo $this->model->getLastSql();
 
-        $model->setOptions($options);
+        $this->model->setOptions($options);
 
         // 7. 整理order
         if(isset($order)){
             if(!in_array($this->post['_sort'][$order], array('asc', 'desc')))
                 \Tiny\Error::echoJson(0, '排序类型错误: ' . $this->post['_sort'][$order]);
-            $model->order($order . ' ' . $this->post['_sort'][$order]);
+            $this->model->order($order . ' ' . $this->post['_sort'][$order]);
+        }elseif(isset($this->setting['default']['sort'])){
+            $this->model->order($this->setting['default']['sort']);
         }else{
             if(isset($this->setting['join'])){
-                $model->order($this->setting['join']['main'] . '.' . $model->getKey() . ' desc');
+                $this->model->order($this->setting['join']['main'] . '.' . $this->model->getKey() . ' desc');
             }else
-                $model->order($model->getKey() . ' desc');
+                $this->model->order($this->model->getKey() . ' desc');
         }
 
         // 8. 整理limit
@@ -261,58 +333,130 @@ class DataTables implements tiny\ThemeBuilder
                 $msg['current'] = $msg['page'];
             if($msg['per'] < 10)
                 $msg['per'] = 10;
-            $model->limit($msg['current'] * $msg['per'] - $msg['per'], $msg['per']);
+            $this->model->limit($msg['current'] * $msg['per'] - $msg['per'], $msg['per']);
         }
 
         // 9. find结果集
-        $msg['rows'] = $model->find();
-//        echo $model->getLastSql();
+        $msg['rows'] = $this->model->find();
+        return $msg;
+    }
 
-        // 10。处理结果集
-        if($msg['rows']){
-            $data = array();
-            foreach($msg['rows'] as $row){
-                $tmp = array();
-                foreach($this->setting['column'] as $column){
-                    if(!$this->_displayColumn($column)) continue;
-                    if(isset($column['name'])){
-                        // 真实字段名
-                        $name = isset($column['alias']) ? $column['alias'] : $column['name'];
-                        if(isset($column['call'])){
-                            switch($column['call']){
-                                case 'date':
-                                    $tmp[] = $row->{$name} ? date('Y-m-d H:i:s', $row->{$name}) : '-';
-                                    break;
-                                case 'date_short':
-                                    $tmp[] = $row->{$name} ? date('Y-m-d', $row->{$name}) : '-';
-                                    break;
-                                case 'enum':
-                                    $tmp[] = isset($column['enum'][$row->{$name}]) ? $column['enum'][$row->{$name}] : '?(' . $row->{$name}. ')';
-                                    break;
-                                default:
-                                    $tmp[] = $this->_callShowRender($column, $helper, $row);
-                            }
-                        }else
-                            $tmp[] = is_null($row->{$name}) ? '' : $row->{$name};
-                    }else
-                        $tmp[] = $this->_callShowRender($column, $helper, $row);
+    private function _renderNormalMongodb(&$msg)
+    {
+        $field = array();
+        $where = isset($this->setting['default']['filter']) ? $this->setting['default']['filter'] : array();
+        foreach($this->setting['column'] as $column){
+            // export
+            if(isset($this->post['_export']) && $this->post['_export'] && $this->_displayColumn($column))
+                $msg['export_title'][] = $column['title'];
+            if(isset($column['name'])){
+                // order，需要放前面，不然后面会continue
+                if(isset($this->post['_sort'][$column['name']]))
+                    $order = $column['name'];
+                // field
+                $field[] = $column['name'];
+                // where
+                if(isset($column['filter'])){
+                    // 执行自定义过滤函数
+                    if(isset($column['filter']['call'])){
+                        $call = $this->action . 'DataTablesFilter' . ucfirst($column['filter']['call']);
+                        if(!method_exists($this->helper, $call))
+                            \Tiny\Error::echoJson(0, '辅助类中的过滤函数不存在: ' . $call);
+                        $helper = $this->helper;
+                        $helper::$call($this->post, $where); // mongodb 的辅助过滤函数只有&$where
+                    }else{ // 内置过滤
+                        if(!isset($this->post['_filter'][$column['name']]) || $this->post['_filter'][$column['name']] === '')
+                            continue;
+                        switch ($column['filter']['type']) {
+                            case 'date': // 默认的date为int类型
+                                $where[$column['name']] = strtotime($this->post['_filter'][$column['name']]);
+                                $where[$column['name']] = $this->_renderTypeMongodb($column, $where[$column['name']]);
+                                break;
+                            case 'date_range':
+                                $dateRange = explode('~', $this->post['_filter'][$column['name']]);
+                                $where[$column['name']] = array(
+                                    '$gte' => $this->_renderTypeMongodb($column, strtotime($dateRange['0'])),
+                                    '$lte' => $this->_renderTypeMongodb($column, strtotime($dateRange['1']))
+                                );
+                                break;
+                            case 'range':
+                                if($this->post['_filter'][$column['name']]['0'] !== '' && $this->post['_filter'][$column['name']]['1'] !== ''){
+                                    $where[$column['name']] = array(
+                                        '$gte' => $this->_renderTypeMongodb($column, intval($this->post['_filter'][$column['name']]['0'])),
+                                        '$lte' => $this->_renderTypeMongodb($column, intval($this->post['_filter'][$column['name']]['1']))
+                                    );
+                                }
+                                break;
+                            case 'input': // 只有input可进行like处理
+                                if(isset($this->post['_like'][$column['name']])){
+                                    $where[$column['name']] = new \MongoRegex("/{$this->post['_filter'][$column['name']]}/");
+                                }else{
+                                    $where[$column['name']] = $this->_renderTypeMongodb($column, $this->post['_filter'][$column['name']]);
+                                }
+                                break;
+                            default:
+                                $where[$column['name']] = $this->_renderTypeMongodb($column, $this->post['_filter'][$column['name']]);
+                        }
+                    }
                 }
-                $data[] = $tmp;
             }
-            $msg['rows'] = $data;
+        }
+//        var_dump($where);
+        $mongo = $this->model->collection->find($where);
+        // 6. 统计总记录数
+        $msg['total'] = $this->model->collection->find($where)->count();
+
+        // 7. 整理order
+        if(isset($order)){
+            if(!in_array($this->post['_sort'][$order], array('asc', 'desc')))
+                \Tiny\Error::echoJson(0, '排序类型错误: ' . $this->post['_sort'][$order]);
+            if($this->post['_sort'][$order] == 'asc'){
+                $this->post['_sort'][$order] = 1;
+            }else{
+                $this->post['_sort'][$order] = -1;
+            }
+            $mongo->sort($this->post['_sort']);
+        }elseif(isset($this->setting['default']['sort'])){
+            $mongo->sort($this->setting['default']['sort']);
         }
 
+        // 8. 整理limit
+        if(!isset($this->setting['page']) || $this->setting['page'] === false){ // 不分页
+            $msg['current'] = isset($this->post['_page']['current']) ? $this->post['_page']['current'] : 1;
+            $msg['per'] =
+                isset($this->post['_page']['per']) ?
+                    $this->post['_page']['per'] :
+                    (isset($this->setting['page']) ? $this->setting['page'] : 10);
+            $msg['page'] = ceil($msg['total'] / $msg['per']);
+            !$msg['page'] && $msg['page'] = 1;
+            if($msg['current'] < 0)
+                \Tiny\Error::echoJson(0, '分页参数错误: 当前页需大于0');
+            if($msg['current'] > $msg['page'])
+                $msg['current'] = $msg['page'];
+            if($msg['per'] < 10)
+                $msg['per'] = 10;
+            $mongo->skip($msg['current'] * $msg['per'] - $msg['per'])->limit($msg['per']);
+        }
 
-        // 11. 执行helper后置函数
-        $method = $this->action . 'DataTablesPostAfter';
-        if(method_exists($helper, $method))
-            $helper::$method($msg);
+        // 9. find结果集
+        $msg['rows'] = array();
+        while($mongo->hasNext()){
+            $row = $mongo->getNext();
+            $object = new \stdClass();
+            foreach($row as $k => $v){
+                $object->$k = $v;
+            };
+            $msg['rows'][] = $object;
+        }
+        return $msg;
+    }
 
-        // 12. 是否是导出
-        if(isset($this->post['_export']) && $this->post['_export'])
-            tiny\Func::any2excel(array_merge(array($exportTitle), $data));
-        // 13. 输出结果
-        tiny\Error::echoJson(1, $msg);
+    private function _renderTypeMongodb($column, $data)
+    {
+        if(isset($column['field_type']) && !is_null($data)){
+            $data = tiny\Helper::mongoType($column['field_type'], $data);
+        }
+        return $data;
     }
 
     private function _callShowRender($column, $helper, $row)
@@ -364,7 +508,7 @@ class DataTables implements tiny\ThemeBuilder
                         $html .= '<option value="">- 请选择 -</option>';
                         if($column['filter']['option']):
                             foreach ($column['filter']['option'] as $k => $v) {
-                                if($value == $k)
+                                if($value === $k)
                                     $selected = 'selected';
                                 else
                                     $selected = '';

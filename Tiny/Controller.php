@@ -28,7 +28,7 @@ abstract class Controller
             switch($this->{$action}['type']){
                 case 'theme':
                     $theme = '\\Tiny\\Theme\\' . $this->{$action}['name'];
-                    $setting = lcfirst($method) . $this->{$action}['name'] . 'Setting';
+                    $setting = $this->_themeSetting($method, $action);
                     $option = isset($this->{$action}['option']) ? $this->{$action}['option'] : array();
 
                     $builder = new $theme(lcfirst($method), $option);
@@ -44,44 +44,12 @@ abstract class Controller
 
                     switch($this->{$action}['name']){
                         case 'Delete': // 删除
-                            if(Request::get('id')){
-                                if($model->delete(Request::get('id'))){
+                            if(Request::get($model->key)){
+                                if($model->delete(Request::get($model->key))){
                                     Error::echoJson(1);
                                 }
                             }
                             Error::echoJson(-1);
-                            break;
-                        case 'Mod': // 添加修改
-                            if(Request::isPost()){
-                                $post = Request::post();
-                                if($post){
-                                    // save前置函数，用来改变post值
-                                    $before = lcfirst($method) . 'ModBefore';
-                                    if(method_exists($helper, $before)){
-                                        $helper::$before($post);
-                                    }
-                                    $attribute = array_keys($model::attributes());
-                                    foreach($post as $k => $v){
-                                        if(in_array($k, $attribute)){
-                                            if(is_array($v)) $v = json_encode($v);
-                                            $model->$k = $v;
-                                        }
-                                    }
-
-                                    if(isset($model->_data[$model->key]) && $model->_data[$model->key]){
-                                        $result = $model->update();
-                                    }else{
-                                        $result = $model->save();
-                                    }
-                                    if($result)
-                                        Error::echoJson('1', 'success');
-                                    else
-                                        Error::echoJson('1', 'save error');
-                                }else
-                                    Error::echoJson('-1', 'data error');
-                            }else{
-                                Error::echoJson('-1', 'method error');
-                            }
                             break;
                     }
                     break;
@@ -111,6 +79,11 @@ abstract class Controller
 
                 break;
         }
+    }
+
+    private function _themeSetting($method, $action)
+    {
+        return lcfirst($method) . $this->{$action}['name'] . 'Setting';
     }
 
     /**

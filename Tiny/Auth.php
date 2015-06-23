@@ -94,7 +94,7 @@ class Auth
     public static function hasPurview($controller = null, $method = null)
     {
         if($controller && $method){
-            $ctr = ucfirst(Config::$application) . '\\' . Config::$controller['0'] . '\\' . $controller;
+            $ctr = ucfirst(Config::$application) . '\\' . Config::$controller['0'] . '\\' . ucfirst($controller);
         }else{
             $ctr = Request::$controller;
             $explode = explode('\\', $ctr);
@@ -109,11 +109,10 @@ class Auth
         $purview = self::getPurviewCache();
 
         $white = property_exists($ctr, 'authWhite') && isset($ctr::$authWhite['purview']) ? $ctr::$authWhite['purview'] : array();
-
         if(
-            !in_array($method, $white) &&
-            !in_array($controller . '@' . $method, $purview) &&
-            !in_array($controller . '@*', $purview)
+            !in_array(strtolower($method), $white) &&
+            !in_array(strtolower($controller . '@' . $method), $purview) &&
+            !in_array(strtolower($controller . '@*'), $purview)
         ){
             return false;
         }

@@ -15,6 +15,7 @@ class Helper
         if ($data) {
             foreach ($data as $v) {
                 if(is_object($v)) $v = (array)$v;
+                if(is_object($v[$key])) $v[$key] = strval($v[$key]);
                 if(is_string($value))
                     $option[$v[$key]] = $v[$value];
                 else{
@@ -70,6 +71,31 @@ class Helper
                 self::getHumanTree($v[$child], $level + 1);
         }
         return $array;
+    }
+
+    public static function mongoType($type, $data)
+    {
+        switch($type){
+            case 'boolean':
+                $data = $data ? true : false;
+                break;
+            case 'int32':
+                $data = intval($data);
+                break;
+            case 'int64':
+                $data = new \MongoInt64($data);
+                break;
+            case 'time':
+                $data = strtotime($data);
+                break;
+            case 'date':
+                $data = new \MongoDate($data);
+                break;
+            default:
+                $data = strval($data);
+        }
+
+        return $data;
     }
 
 }

@@ -53,6 +53,7 @@ namespace Tiny;
 
 class ORM
 {
+    public $type = 'mysql';
     public static $db; // db对象
     public static $prefix; // 表前缀
 
