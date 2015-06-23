@@ -17,6 +17,8 @@ abstract class Config
     static $viewDir = ''; // __DIR__ . '/../app/view/'
     static $controller = array();  // array('Namespace', 'app/Controller')
     static $error404 = array();  // array('Controller', 'method')
+    static $secret = '8RtX*K#%Gw=5VEQ=VT';
+    static $authPurview = false; // 是否验证权限
 
     public static function __callStatic($method, $args = array())
     {

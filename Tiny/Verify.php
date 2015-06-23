@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 14-7-16
  * Time: 下午8:10
@@ -26,12 +26,13 @@ namespace Tiny;
 class Verify
 {
     var $len = 4; //验证码长度
-    var $str = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; //验证码字符列表
+    var $str = 'abcdefghjkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; //验证码字符列表
     var $height = 40; //验证码高度，将根据高度自适应宽度
     var $background = array(255, 255, 255); //背景颜色rbg
     var $findColor = false; //是否开启看颜色识别验证码
     var $font = ''; //字体文件，可以使用自创字体加强安全性
     var $autoLower = true; //是否自动转为全小写
+    static $sessionKey = 'verify_code';
 
     private $frames = 32; //动画帧数
     private $tips = ''; //如果开启了看颜色识别，这里显示当前验证字符的颜色
@@ -163,7 +164,9 @@ class Verify
      */
     public function outputVerify()
     {
+        $this->createVerify();
         $gif = new gifEncoder($this->imageData, $this->delay);
+        Session::set(static::$sessionKey, $this->autoLower ? strtolower($this->verifyCode) : $this->verifyCode);
         header('content-type:image/gif');
         echo $gif->GetAnimation();
     }
@@ -181,9 +184,11 @@ class Verify
     /**
      * 获取验证码字符串，用于存session
      */
-    public function getVerify()
+    public static function getVerify()
     {
-        return $this->autoLower ? strtolower($this->verifyCode) : $this->verifyCode;
+        $verify = Session::get(self::$sessionKey);
+        Session::set(self::$sessionKey, null);
+        return $verify;
     }
 
     /**

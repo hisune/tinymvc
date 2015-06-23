@@ -12,7 +12,13 @@ namespace Tiny;
 class Cookie
 {
 
-    public static $settings = array();
+    public static $settings = array(
+        'expires' => null,
+        'path' => '/',
+        'domain' => null,
+        'secure' => null,
+        'httponly' => null,
+    );
 
     /**
      * Decrypt and fetch cookie data
@@ -23,19 +29,12 @@ class Cookie
      */
     public static function get($name, $config = NULL)
     {
-        // Use default config settings if needed
-        $config = $config ?: static::$settings;
-
         if(isset($_COOKIE[$name]))
         {
             // Decrypt cookie using cookie key
-            if($v = json_decode(Cipher::decrypt(base64_decode($_COOKIE[$name]), Config::config()->key)))
+            if($v = json_decode(Cipher::decrypt(base64_decode($_COOKIE[$name]), Config::config()->key), true))
             {
-                // Has the cookie expired?
-                if($v[0] < $config['timeout'])
-                {
-                    return is_scalar($v[1])?$v[1]:(array)$v[1];
-                }
+                return $v;
             }
         }
 
@@ -52,13 +51,13 @@ class Cookie
      * return boolean
      * @internal param string $key cookie name
      */
-    public static function set($name, $value, $config = NULL)
+    public static function set($name, $value, $config = array())
     {
         // Use default config settings if needed
-        extract($config ?: static::$settings);
+        extract(array_merge(static::$settings, $config));
 
         // If the cookie is being removed we want it left blank
-        $value = $value ? base64_encode(Cipher::encrypt(json_encode(array(time(), $value)), Config::config()->key)) : '';
+        $value = $value ? base64_encode(Cipher::encrypt(json_encode($value), Config::config()->key)) : null;
 
         // Save cookie to user agent
         setcookie($name, $value, $expires, $path, $domain, $secure, $httponly);

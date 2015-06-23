@@ -20,36 +20,36 @@ class Request
      * Is this a GET request?
      * @return bool
      */
-    public function isGet()
+    public static function isGet()
     {
-        return $this->getMethod() === self::METHOD_GET;
+        return self::getMethod() === self::METHOD_GET;
     }
 
     /**
      * Is this a POST request?
      * @return bool
      */
-    public function isPost()
+    public static function isPost()
     {
-        return $this->getMethod() === self::METHOD_POST;
+        return self::getMethod() === self::METHOD_POST;
     }
 
     /**
      * Get HTTP method
      * @return string
      */
-    public function getMethod()
+    public static function getMethod()
     {
         return $_SERVER['REQUEST_METHOD'];
     }
 
-    public function get($key = null)
+    public static function get($key = null)
     {
         if (is_null($key)) return $_GET;
         else return isset($_GET[$key]) ? (is_array($_GET[$key]) ? $_GET[$key] : trim($_GET[$key])) : NULL;
     }
 
-    public function post($key = null)
+    public static function post($key = null)
     {
         if (is_null($key)) return $_POST;
         else return isset($_POST[$key]) ? (is_array($_POST[$key]) ? $_POST[$key] : trim($_POST[$key])) : NULL;

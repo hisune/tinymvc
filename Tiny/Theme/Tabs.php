@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 2014/9/30 0030
  * Time: 下午 3:12
@@ -14,6 +14,14 @@ class Tabs implements tiny\ThemeBuilder
     public $setting = array(); // 配置数组
     public $id = 'tabs'; // 唯一id
     public $html = ''; // html内容
+    public $action; // action名
+    public $option; // option
+
+    public function __construct($action, $option)
+    {
+        $this->action = $action;
+        $this->option = $option;
+    }
 
     public function build()
     {
@@ -72,7 +80,7 @@ class Tabs implements tiny\ThemeBuilder
 
     private function _show()
     {
-        // 临时引入
+//        // 临时引入
 //        echo '<script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>';
 //        echo '<link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">';
 //        echo '<link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" rel="stylesheet">';

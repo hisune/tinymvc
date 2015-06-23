@@ -43,8 +43,10 @@ class View
      * 模板显示
      * 指定layout的情况下使用子模板模式，不指定直接显示当前模板
      */
-    public function display($tpl)
+    public function display($tpl = '')
     {
+        $tpl || $tpl = Url::pathInfo();
+
         if($this->layout){
             self::$content = $this->_getContent($tpl);
             $content = $this->_getContent($this->layout);
@@ -139,6 +141,20 @@ class View
                 'rel' => 'stylesheet',
                 'type' => 'text/css',
                 'href' => self::srcUri($name, $cdn, $dir)
+            )
+        );
+    }
+
+    public static function img($name, $cdn = false, $attribute = array(), $dir = 'asset')
+    {
+        return Html::tag(
+            'img',
+            '',
+            array_merge(
+                array(
+                    'src' => self::srcUri($name, $cdn, $dir)
+                ),
+                $attribute
             )
         );
     }

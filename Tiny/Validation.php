@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 14-7-11
  * Time: 下午5:24
@@ -412,6 +412,18 @@ class Validation
     protected function base64_rule($data)
     {
         return preg_match('/[^a-zA-Z0-9\/\+=]/', $data);
+    }
+
+    protected function equal_rule($field, $data)
+    {
+        return $field == $data;
+    }
+
+    // 返回的错误验证
+    public function validateWithBack()
+    {
+        if($this->errors)
+            Helper::backWithInputTips($this->data, null, $this->errors);
     }
 
 }

@@ -27,20 +27,20 @@ class Dispatch
         if(!is_null(Request::$controller) && !is_null(Request::$method)){
             if(!class_exists(Request::$controller)){
                 if(Config::$error404){
-                    Request::$controller = ucfirst(\Tiny\Config::$application) . '\\' . Config::$controller['0'] . '\\' . Config::$error404['0'];
+                    Request::$controller = Config::$controller['0'] . '\\' . Config::$error404['0'];
                     Request::$method = Config::$error404['1'];
                     Request::$params = array();
                 }else
                     Error::print404();
+            }else{
+                $controllerInstance = new Request::$controller();
+                $controllerInstance->initialize(Request::$method);
+
+                if(Request::$params)
+                    call_user_func_array(array($controllerInstance, Request::$method), Request::$params);
+                else
+                    $controllerInstance->{Request::$method}();
             }
-
-            $controllerInstance = new Request::$controller();
-            $controllerInstance->initialize(Request::$method);
-
-            if(Request::$params)
-                call_user_func_array(array($controllerInstance, Request::$method), Request::$params);
-            else
-                $controllerInstance->{Request::$method}();
         }
 
         if(Config::config()->debug)

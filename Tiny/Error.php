@@ -52,7 +52,7 @@ class Error
         echo 'Ooooops, page not found!';
     }
 
-    public static function echoJson($ret, $msg, $exit = true)
+    public static function echoJson($ret, $msg = '', $exit = true)
     {
         echo json_encode(array('ret' => $ret, 'msg' => $msg));
         $exit && exit;

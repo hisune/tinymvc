@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 14-7-14
  * Time: 下午3:08
@@ -15,12 +15,13 @@ class Url
         return $scriptName == '\\' ? '' : preg_replace('/(\/' . Config::$application . ')$/', '/(' . Config::$application . '\/)?', $scriptName);
     }
 
-    public static function get($name)
+    public static function get($name, array $params = array())
     {
         $scriptName = self::getScriptPreg();
         preg_match('/^'.$scriptName.'/', $_SERVER['REQUEST_URI'], $match); // 获取请求地址的根目录，支持加public和不加public
 
         $uri = isset($match['0']) ? $match['0'] . $name : $name;
+        $params && $uri = $uri . '?' . http_build_query($params);
         return self::getDomain() . $uri;
     }
 
@@ -40,6 +41,7 @@ class Url
 
         return $protocol . $_SERVER['HTTP_HOST'];
     }
+
 
     public static function redirect($name = '')
     {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 14-7-31
  * Time: 下午3:40
@@ -56,9 +56,9 @@ class ORM
     public static $db; // db对象
     public static $prefix; // 表前缀
 
-    protected $key = 'id'; // 主键
+    public $key = 'id'; // 主键
     protected $name; // 配置数组key
-    protected $data; // 你懂的
+    public $_data; // 你懂的
     protected $table; // 表名
     protected $options; // 操作对象
     protected $prepareParam = array(); // 预处理数组
@@ -97,12 +97,7 @@ class ORM
 
     public function __set($key, $value)
     {
-        $this->data[$this->_parseName($key)] = $value;
-    }
-
-    public function __get($key)
-    {
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        $this->_data[$this->_parseName($key)] = $value;
     }
 
     private function _setTableName()
@@ -120,7 +115,7 @@ class ORM
 
     public function getTableName()
     {
-        return isset($this->options['table']['0']) ? $this->options['table']['0'] : $this->table;
+        return isset($this->options['table']['0']) ? '`' . $this->options['table']['0'] . '`' : '`' . $this->table . '`';
     }
 
     /**
@@ -211,7 +206,7 @@ class ORM
      */
     public function save($data = NULL, $replace = false)
     {
-        if (is_null($data)) $data = $this->data;
+        if (is_null($data)) $data = $this->_data;
         if (!$data) return NULL;
 
         $this->createdAt && $data['created_at'] = $this->_getTime();
@@ -230,7 +225,7 @@ class ORM
      */
     public function batchSave($data = null)
     {
-        if (is_null($data)) $data = $this->data;
+        if (is_null($data)) $data = $this->_data;
         if (!$data) return NULL;
 
         $one = current($data);
@@ -260,7 +255,7 @@ class ORM
      */
     public function update($data = null, $all = false)
     {
-        if (is_null($data)) $data = $this->data;
+        if (is_null($data)) $data = $this->_data;
         if (!$data) return NULL;
 
         $this->updatedAt && $data['updated_at'] = $this->_getTime();
@@ -489,5 +484,9 @@ class ORM
     {
         $db = $this->getDb();
         return $db::$queries;
+    }
+
+    public static function attributes(){
+        return array();
     }
 }

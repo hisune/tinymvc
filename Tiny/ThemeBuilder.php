@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 2014/9/30 0030
  * Time: 下午 4:20
@@ -11,6 +11,8 @@ namespace Tiny;
 
 interface ThemeBuilder
 {
+
+    public function __construct($action, $option);
 
     public function build();
 

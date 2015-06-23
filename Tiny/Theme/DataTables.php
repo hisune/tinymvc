@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 2014/9/30 0030
  * Time: 上午 10:07
@@ -24,6 +24,14 @@ class DataTables implements tiny\ThemeBuilder
     );
     public $post = array(); // 查询数据的post内容
     public $url = '';
+    public $action; // action名
+    public $option; // option
+
+    public function __construct($action, $option)
+    {
+        $this->action = $action;
+        $this->option = $option;
+    }
 
     public function build()
     {
@@ -117,8 +125,9 @@ class DataTables implements tiny\ThemeBuilder
             \Tiny\Error::echoJson(0, '辅助类不存在: ' . $helper);
 
         // 2. 执行helper前置函数
-        if(method_exists($helper, 'dataTablesPostBefore'))
-            $helper::dataTablesPostBefore($this->post);
+        $method = $this->action . 'DataTablesPostBefore';
+        if(method_exists($helper, $method))
+            $helper::$method($this->post);
 
         $model = new $model;
 
@@ -144,14 +153,14 @@ class DataTables implements tiny\ThemeBuilder
                     $order = $column['name'];
                 // field
                 if(isset($column['alias']))
-                    $field .= "{$column['name']} as {$column['alias']},";
+                    $field .= "`{$column['name']}` as {$column['alias']},";
                 else
-                    $field .= "{$column['name']} as '{$column['name']}',"; // 这里防止join并且未设置字段alias时处理数据无法得到对应值
+                    $field .= "`{$column['name']}` as '{$column['name']}',"; // 这里防止join并且未设置字段alias时处理数据无法得到对应值
                 // where
                 if(isset($column['filter'])){
                     // 执行自定义过滤函数
                     if(isset($column['filter']['call'])){
-                        $call = 'dataTablesFilter' . ucfirst($column['filter']['call']);
+                        $call = $this->action . 'DataTablesFilter' . ucfirst($column['filter']['call']);
                         if(!method_exists($helper, $call))
                             \Tiny\Error::echoJson(0, '辅助类中的过滤函数不存在: ' . $call);
                         $helper::$call($this->post, $callStr, $callBind);
@@ -211,13 +220,14 @@ class DataTables implements tiny\ThemeBuilder
 
         // 5. 其他默认配置参数（group，having）
         if(isset($this->setting['default']['group']) && $this->setting['default']['group'])
-            $this->model->group($this->setting['default']['group']);
+            $model->group($this->setting['default']['group']);
         if(isset($this->setting['default']['having']) && $this->setting['default']['having'])
-            $this->model->having($this->setting['default']['having']);
+            $model->having($this->setting['default']['having']);
         $msg['js'] = isset($this->setting['js']) ? $this->setting['js'] : '';
 
         // 6. 统计总记录数
         $msg['total'] = $model->count();
+//        echo $model->getLastSql();
         if($msg['total'] == 0)
             \Tiny\Error::echoJson(2, '好像木有数据...');
 
@@ -256,6 +266,7 @@ class DataTables implements tiny\ThemeBuilder
 
         // 9. find结果集
         $msg['rows'] = $model->find();
+//        echo $model->getLastSql();
 
         // 10。处理结果集
         if($msg['rows']){
@@ -293,8 +304,9 @@ class DataTables implements tiny\ThemeBuilder
 
 
         // 11. 执行helper后置函数
-        if(method_exists($helper, 'dataTablesPostAfter'))
-            $helper::dataTablesPostAfter($msg);
+        $method = $this->action . 'DataTablesPostAfter';
+        if(method_exists($helper, $method))
+            $helper::$method($msg);
 
         // 12. 是否是导出
         if(isset($this->post['_export']) && $this->post['_export'])
@@ -307,7 +319,7 @@ class DataTables implements tiny\ThemeBuilder
     {
         if(!isset($column['call']))
             \Tiny\Error::echoJson(0, '参数配置缺失call函数');
-        $call = 'dataTablesShow' . ucfirst($column['call']);
+        $call = $this->action . 'DataTablesShow' . ucfirst($column['call']);
         if(!method_exists($helper, $call))
             \Tiny\Error::echoJson(0, '辅助类中的输出函数不存在: ' . $call);
         return $helper::$call($row);
@@ -461,17 +473,6 @@ class DataTables implements tiny\ThemeBuilder
 
     private function _show()
     {
-        // 临时引入
-//        echo '<script src="http://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>';
-//        echo '<link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">';
-//        echo '<link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" rel="stylesheet">';
-//        echo '<script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>';
-//        echo tiny\View::script('bootstrap/plugin/daterangepicker/moment.js');
-//        echo tiny\View::script('bootstrap/plugin/daterangepicker/daterangepicker.js');
-//        echo tiny\View::style('bootstrap/plugin/daterangepicker/daterangepicker-bs3.css');
-//        echo tiny\View::script('bootstrap/plugin/multiselect/bootstrap-multiselect.js');
-//        echo tiny\View::style('bootstrap/plugin/multiselect/bootstrap-multiselect.css');
-
         echo $this->_css();
         echo $this->html;
         echo $this->_js();

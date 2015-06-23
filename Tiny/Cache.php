@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by hisune.com
+ * Created by hisune.com.
  * User: hi@hisune.com
  * Date: 14-8-19
  * Time: 下午5:38
@@ -14,7 +14,6 @@ class Cache
     private static $_instance = null;
 
     protected $_options = array(
-        'cache_dir' => "./",
         'file_name_prefix' => 's_cache',
         'mode' => '1', //mode 1 为serialize model 2为保存为可执行文件
     );
@@ -114,6 +113,14 @@ class Cache
         return true;
     }
 
+    public static function cacheDir()
+    {
+        if(Config::$varDir)
+            return Config::$varDir . 'cache/';
+        else
+            return './';
+    }
+
     /**
      * 通过缓存id得到缓存信息路径
      * @param string $id
@@ -122,8 +129,8 @@ class Cache
     protected function _file($id)
     {
         $instance = self::getInstance();
-        $fileName = $instance->_idToFileName($id);
-        return $instance->_options['cache_dir'] . $fileName;
+        $fileNmae = $instance->_idToFileName($id);
+        return self::cacheDir() . $fileNmae;
     }
 
     /**
@@ -219,31 +226,6 @@ class Cache
     }
 
     /**
-     * 设置缓存路径
-     *
-     * @param string $path
-     * @return self
-     */
-    public static function setCacheDir($path)
-    {
-        $instance = self::getInstance();
-        if (!file_exists($path)) {
-            mkdir($path);
-        }
-        if (!is_dir($path)) {
-            exit('file_cache: ' . $path . ' 不是一个有效路径 ');
-        }
-        if (!is_writable($path)) {
-            exit('file_cache: 路径 "' . $path . '" 不可写');
-        }
-
-        $path = rtrim($path, '/') . '/';
-        $instance->_options['cache_dir'] = $path;
-
-        return $instance;
-    }
-
-    /**
      * 设置缓存文件前缀
      *
      * @param srting $prefix
@@ -281,7 +263,7 @@ class Cache
     public static function flush()
     {
         $instance = self::getInstance();
-        $glob = @glob($instance->_options['cache_dir'] . $instance->_options['file_name_prefix'] . '--*');
+        $glob = @glob(self::cacheDir() . $instance->_options['file_name_prefix'] . '--*');
 
         if (empty($glob)) {
             return false;
