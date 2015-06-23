@@ -1,5 +1,5 @@
 {
-    "name": "tinvmvc",
+    "name": "hisune/tinvmvc",
     "keywords": ["tiny framework", "tiny MVC", "hisune"],
     "license": "MIT",
     "description": "The Tiny MVC Framework Libraries",
