@@ -5,5 +5,13 @@
     "description": "The Tiny MVC Framework Libraries",
     "require": {
         "tiny/tiny": "*"
-    }
+    },
+    "authors": [
+        {
+            "name": "Hisune",
+            "email": "hi@hisune.com",
+            "homepage": "http://hisune.com/",
+            "role": "Founder and project lead"
+        }
+    ]
 }
