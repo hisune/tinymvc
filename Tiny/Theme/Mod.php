@@ -141,7 +141,7 @@ class Mod implements tiny\ThemeBuilder
             'div',
             $this->html,
             array(
-                'class' => 'box',
+                'class' => 'box box-success',
             )
         );
         // form
@@ -173,6 +173,8 @@ class Mod implements tiny\ThemeBuilder
             $tips = isset($mod['tips']) && $mod['tips'] ? $mod['tips'] : false;// tips
             $tipsHtml = $tips ? tiny\Html::tag('i', '', array('class' => 'glyphicon glyphicon-question-sign', 'data-toggle' => 'tooltip', 'data-placement' => 'top', 'data-original-title' => $tips)) : '';
             $line = tiny\Html::tag('label', $mod['title']  . ' ' . $tipsHtml, array('class' => 'col-sm-2 control-label'));
+            if(isset($mod['attribute']))// attribute
+                $attribute = array_merge($attribute, $mod['attribute']);
             switch($mod['type']){
                 case 'input': // name, title, default
                     $default = $this->_renderDefault($mod);

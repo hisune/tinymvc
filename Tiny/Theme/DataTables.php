@@ -49,7 +49,7 @@ class DataTables implements tiny\ThemeBuilder
                 $this->_show();
             }
         }else
-            echo 'dataTables 配置有误';
+            echo 'dataTables config error';
     }
 
     private function _renderHtml()
@@ -64,7 +64,7 @@ class DataTables implements tiny\ThemeBuilder
             'div',
             $this->_filter(),
             array(
-                'class' => 'panel-heading',
+                'class' => 'box-header with-border',
             )
         );
         // dataTable内容table
@@ -72,7 +72,7 @@ class DataTables implements tiny\ThemeBuilder
             'div',
             $this->_table(),
             array(
-                'class' => 'panel-body'
+                'class' => 'box-body'
             )
         );
         // dataTable底部
@@ -81,7 +81,7 @@ class DataTables implements tiny\ThemeBuilder
             '<div class="row"><div class="col-sm-12"><div class="pull-left" id="' . $this->id . '-page-left"></div>
                 <div class="pull-right" id="' . $this->id . '-page-right"></div></div></div>',
             array(
-                'class' => 'panel-footer'
+                'class' => 'box-footer'
             )
         );
         // dataTables包裹层
@@ -89,7 +89,7 @@ class DataTables implements tiny\ThemeBuilder
             'div',
             $this->html,
             array(
-                'class' => 'panel panel-default',
+                'class' => 'box box-primary',
                 'id' => $this->id,
             )
         );
@@ -121,9 +121,9 @@ class DataTables implements tiny\ThemeBuilder
                 str_replace('\\Controller\\', '\\Model\\', \Tiny\Request::$controller);
         $this->helper = str_replace('\\Controller\\', '\\Helper\\', \Tiny\Request::$controller);
         if(!class_exists($model))
-            \Tiny\Error::echoJson(0, '模型不存在: ' . $model);
+            \Tiny\Error::echoJson(0, 'Model missing: ' . $model);
         if(!class_exists($this->helper))
-            \Tiny\Error::echoJson(0, '辅助类不存在: ' . $this->helper);
+            \Tiny\Error::echoJson(0, 'Helper missing: ' . $this->helper);
 
         // 2. 执行helper前置函数
         $method = $this->action . 'DataTablesPostBefore';
@@ -141,7 +141,7 @@ class DataTables implements tiny\ThemeBuilder
         $call = '_renderNormal' . ucfirst($this->model->type);
         $this->$call($msg);
         if($msg['total'] == 0)
-            \Tiny\Error::echoJson(2, '好像木有数据...');
+            \Tiny\Error::echoJson(2, 'Oooops, it seems like there is no data to display...');
 
         // 10。处理结果集
         if($msg['rows']){
@@ -233,7 +233,7 @@ class DataTables implements tiny\ThemeBuilder
                     if(isset($column['filter']['call'])){
                         $call = $this->action . 'DataTablesFilter' . ucfirst($column['filter']['call']);
                         if(!method_exists($this->helper, $call))
-                            \Tiny\Error::echoJson(0, '辅助类中的过滤函数不存在: ' . $call);
+                            \Tiny\Error::echoJson(0, 'Helper filter method missing: ' . $call);
                         $helper = $this->helper;
                         $helper::$call($this->post, $callStr, $callBind);
                         if($callStr && $callBind){
@@ -306,7 +306,7 @@ class DataTables implements tiny\ThemeBuilder
         // 7. 整理order
         if(isset($order)){
             if(!in_array($this->post['_sort'][$order], array('asc', 'desc')))
-                \Tiny\Error::echoJson(0, '排序类型错误: ' . $this->post['_sort'][$order]);
+                \Tiny\Error::echoJson(0, 'Sort type error: ' . $this->post['_sort'][$order]);
             $this->model->order($order . ' ' . $this->post['_sort'][$order]);
         }elseif(isset($this->setting['default']['sort'])){
             $this->model->order($this->setting['default']['sort']);
@@ -328,12 +328,14 @@ class DataTables implements tiny\ThemeBuilder
                     (isset($this->setting['page']) ? $this->setting['page'] : 10);
             $msg['page'] = ceil($msg['total'] / $msg['per']);
             if($msg['current'] < 0)
-                \Tiny\Error::echoJson(0, '分页参数错误: 当前页需大于0');
+                \Tiny\Error::echoJson(0, 'Page param error: current page must greater than zero');
             if($msg['current'] > $msg['page'])
                 $msg['current'] = $msg['page'];
             if($msg['per'] < 10)
                 $msg['per'] = 10;
-            $this->model->limit($msg['current'] * $msg['per'] - $msg['per'], $msg['per']);
+            $skip = $msg['current'] * $msg['per'] - $msg['per'];
+            $skip < 0 && $skip = 0;
+            $this->model->limit($skip, $msg['per']);
         }
 
         // 9. find结果集
@@ -361,7 +363,7 @@ class DataTables implements tiny\ThemeBuilder
                     if(isset($column['filter']['call'])){
                         $call = $this->action . 'DataTablesFilter' . ucfirst($column['filter']['call']);
                         if(!method_exists($this->helper, $call))
-                            \Tiny\Error::echoJson(0, '辅助类中的过滤函数不存在: ' . $call);
+                            \Tiny\Error::echoJson(0, 'Helper filter method missing: ' . $call);
                         $helper = $this->helper;
                         $helper::$call($this->post, $where); // mongodb 的辅助过滤函数只有&$where
                     }else{ // 内置过滤
@@ -409,7 +411,7 @@ class DataTables implements tiny\ThemeBuilder
         // 7. 整理order
         if(isset($order)){
             if(!in_array($this->post['_sort'][$order], array('asc', 'desc')))
-                \Tiny\Error::echoJson(0, '排序类型错误: ' . $this->post['_sort'][$order]);
+                \Tiny\Error::echoJson(0, 'Sort param error: ' . $this->post['_sort'][$order]);
             if($this->post['_sort'][$order] == 'asc'){
                 $this->post['_sort'][$order] = 1;
             }else{
@@ -430,12 +432,14 @@ class DataTables implements tiny\ThemeBuilder
             $msg['page'] = ceil($msg['total'] / $msg['per']);
             !$msg['page'] && $msg['page'] = 1;
             if($msg['current'] < 0)
-                \Tiny\Error::echoJson(0, '分页参数错误: 当前页需大于0');
+                \Tiny\Error::echoJson(0, 'Page param error: current page must greater than zero');
             if($msg['current'] > $msg['page'])
                 $msg['current'] = $msg['page'];
             if($msg['per'] < 10)
                 $msg['per'] = 10;
-            $mongo->skip($msg['current'] * $msg['per'] - $msg['per'])->limit($msg['per']);
+            $skip = $msg['current'] * $msg['per'] - $msg['per'];
+            $skip < 0 && $skip = 0;
+            $mongo->skip($skip)->limit($msg['per']);
         }
 
         // 9. find结果集
@@ -462,10 +466,10 @@ class DataTables implements tiny\ThemeBuilder
     private function _callShowRender($column, $helper, $row)
     {
         if(!isset($column['call']))
-            \Tiny\Error::echoJson(0, '参数配置缺失call函数');
+            \Tiny\Error::echoJson(0, 'Helper call method missing');
         $call = $this->action . 'DataTablesShow' . ucfirst($column['call']);
         if(!method_exists($helper, $call))
-            \Tiny\Error::echoJson(0, '辅助类中的输出函数不存在: ' . $call);
+            \Tiny\Error::echoJson(0, 'Helper display method missing: ' . $call);
         return $helper::$call($row);
     }
 
@@ -499,13 +503,13 @@ class DataTables implements tiny\ThemeBuilder
                         $title = isset($column['filter']['title']) ? $column['filter']['title'] : $column['title'];
                         $html .= "{$column['title']}: <input type='text' name='_filter[{$column['name']}]' class='form-control input-sm data-tables-submit' value='{$value}' placeholder='{$title}' {$width}>";
                         if(isset($column['filter']['like']) && $column['filter']['like'])
-                            $html .= " <input type='checkbox' class='data-tables-submit pointer' name='_like[{$column['name']}]' value='true' title='是否使用模糊查询'/>";
+                            $html .= " <input type='checkbox' class='data-tables-submit pointer' name='_like[{$column['name']}]' value='true' title='Whether to use fuzzy queries'/>";
                         break;
                     case 'select': // select单选值过滤，可设置value, option
                         // html
                         $class = str_replace('.', '', 'select-single-' . $column['name']); // 过滤join
                         $html .= "{$column['title']}: <select name='_filter[{$column['name']}]' class='data-tables-submit select-single {$class}'>";
-                        $html .= '<option value="">- 请选择 -</option>';
+                        $html .= '<option value="">- Select -</option>';
                         if($column['filter']['option']):
                             foreach ($column['filter']['option'] as $k => $v) {
                                 if($value === $k)
@@ -527,8 +531,8 @@ class DataTables implements tiny\ThemeBuilder
                             $range = explode('~', $value);
                         else
                             $range['0'] = $range['1'] = '';
-                        $html .= "{$column['title']}: <input type='text' name='_filter[{$column['name']}][0]' class='form-control input-sm data-tables-submit' value='{$range['0']}' placeholder='从' {$width}>~
-                                  <input type='text' name='_filter[{$column['name']}][1]' class='form-control input-sm data-tables-submit' value='{$range['1']}' placeholder='到' {$width}>";
+                        $html .= "{$column['title']}: <input type='text' name='_filter[{$column['name']}][0]' class='form-control input-sm data-tables-submit' value='{$range['0']}' placeholder='From' {$width}>~
+                                  <input type='text' name='_filter[{$column['name']}][1]' class='form-control input-sm data-tables-submit' value='{$range['1']}' placeholder='To' {$width}>";
                         break;
                     case 'date_range':
                         if(isset($column['filter']['format'])){
@@ -563,9 +567,9 @@ class DataTables implements tiny\ThemeBuilder
             $html .= $this->setting['title'];
         // 搜索与导出按钮
         if($search)
-            $html .= '<button type="button" class="btn btn-primary btn-sm" style="margin-left: 12px;" onclick="dataTablesSubmit();">搜索</button>';
+            $html .= '<button type="button" class="btn btn-primary btn-sm" style="margin-left: 12px;" onclick="dataTablesSubmit();">Search</button>';
         if(isset($this->setting['export']) && $this->setting['export'])
-            $html .= '<button type="button" class="btn btn-info btn-sm" style="margin-left: 12px;" onclick="dataTablesSubmit(true);">导出</button>';
+            $html .= '<button type="button" class="btn btn-info btn-sm" style="margin-left: 12px;" onclick="dataTablesSubmit(true);">Export</button>';
 
         return $html;
     }
@@ -709,7 +713,7 @@ function dataTablesSubmit(exp){
                 body.html('<tr><td colspan="' + column + '"><div class="progress progress-striped active" style=" margin:15px 50px;"><div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div></div></td></tr>');
             },
             error: function(){
-                body.html('<tr><td colspan="' + column + '"><div class="alert alert-danger" role="alert">_(:з)∠)_&nbsp;&nbsp;&nbsp;加载出错或超时了</div></td></tr>');
+                body.html('<tr><td colspan="' + column + '"><div class="callout callout-danger"><h4>_(:з)∠)_ Load error or timed out</h4><p>If this occurs frequently, plz contact your system administrator</p></div></td></tr>');
             },
             success : function(json){
                 if(json.ret == 1){
@@ -727,14 +731,15 @@ function dataTablesSubmit(exp){
                     //==开始处理分页
                     if(typeof json.msg.per != 'undefined'){
                         // 处理分页
-                        \$("#{$this->id}-page-left").html('第 ' + ((json.msg.current - 1) * json.msg.per + 1) + ' 到 ' + (json.msg.current * json.msg.per <= json.msg.total ? json.msg.current * json.msg.per : json.msg.total) + ' 条; ' +
-                         '共 ' + json.msg.total + ' 条 ' + json.msg.page + ' 页; 每页显示 ' +
+                        \$("#{$this->id}-page-left").html('From ' + ((json.msg.current - 1) * json.msg.per + 1) + ' to ' + (json.msg.current * json.msg.per <= json.msg.total ? json.msg.current * json.msg.per : json.msg.total) + ' row. ' +
+                         'Total ' + json.msg.total + ' rows ' + json.msg.page + ' pages. Per page ' +
                          '<select size="1" name="_page[per]" class="input-sm data-tables-submit" onchange="dataTablesSubmit();">' +
                          '<option value="10" ' + (json.msg.per == 10 ? "selected='selected'" : '') + '>10</option>' +
                          '<option value="25" ' + (json.msg.per == 25 ? "selected='selected'" : '') + '>25</option>' +
                          '<option value="50" ' + (json.msg.per == 50 ? "selected='selected'" : '') + '>50</option>' +
                          '<option value="100" ' + (json.msg.per == 100 ? "selected='selected'" : '') + '>100</option>' +
-                         '</select> 条');
+                         '<option value="500" ' + (json.msg.per == 500 ? "selected='selected'" : '') + '>500</option>' +
+                         '</select> rows');
                         var pageNav = ''; // 分页按钮
                         // 最大按钮
                         if (json.msg.current < 3)
@@ -748,19 +753,19 @@ function dataTablesSubmit(exp){
                             pageNav += '<li' + (json.msg.current == i ? ' class="active"' : '') + ' name="' + i + '" onclick="goPage($(this))"><a>' + i + '</a></li>';
                         }
                         \$('#{$this->id}-page-right').html('<ul class="pagination" style="margin:0;">' +
-                            '<span style="margin-left: 10px;" class="data-tables-jump">我跳: <input type="text" class="form-control input-sm data-tables-submit" style="display: inline-block; width: 50px;" name="_page[current]" onchange="dataTablesSubmit();" value="' + json.msg.current + '"/></span>' +
+                            '<span style="margin-left: 10px;" class="data-tables-jump">Jump: <input type="text" class="form-control input-sm data-tables-submit" style="display: inline-block; width: 50px;" name="_page[current]" onchange="dataTablesSubmit();" value="' + json.msg.current + '"/></span>' +
                             '<li class="first' + (json.msg.current == 1 ? ' disabled' : '') + '" name="first" onclick="goPage($(this))">' +
-                            '<a>首页</a></li>' +
+                            '<a>First</a></li>' +
                             '<li class="prev' + (json.msg.current == 1 ? ' disabled' : '') + '" name="prev" onclick="goPage($(this))">' +
-                            '<a>前页</a></li>' + pageNav +
+                            '<a>Prev</a></li>' + pageNav +
                             '<li class="next' + (json.msg.current * json.msg.per >= json.msg.total ? ' disabled' : '') + '" name="next" onclick="goPage($(this))">' +
-                            '<a>后页</a>' +
+                            '<a>Next</a>' +
                             '</li>' +
                             '<li class="last' + (json.msg.current * json.msg.per >= json.msg.total ? ' disabled' : '') + '" name="' + json.msg.page + '" onclick="goPage($(this))">' +
-                            '<a>末页</a>' +
+                            '<a>Last</a>' +
                             '</li></ul>');
                     }else{ // 不分页
-                        \$("#{$this->id}-page-left").html('共查找到 ' + json.msg.total + ' 条记录');
+                        \$("#{$this->id}-page-left").html('Total ' + json.msg.total + ' rows');
                     }
 
                     // js
@@ -770,11 +775,11 @@ function dataTablesSubmit(exp){
                 }else{
                     var html = '';
                     if(json.ret == 2)
-                        var alert = 'info';
+                        var alert = 'success';
                     else
-                        var alert = 'danger';
-                    body.html('<tr><td colspan="' + column + '"><div class="alert alert-' + alert + '" role="alert">_(:з)∠)_&nbsp;&nbsp;&nbsp;' + json.msg + '</div></td></tr>');
-                    \$("#{$this->id}-page-left").html('共 0 条记录');
+                        var alert = 'warning';
+                    body.html('<tr><td colspan="' + column + '"><div class="callout callout-'+ alert +'"><h4>_(:з)∠)_</h4><p>' + json.msg + '</p></div></td></tr>');
+                    \$("#{$this->id}-page-left").html('Total 0 rows');
                 }
             }
         });
@@ -836,10 +841,10 @@ JS;
     format: '$format',
     separator: ' ~ ',
     locale: {
-        applyLabel: '确定',
-        fromLabel: '从',
-        toLabel: '到',
-        customRangeLabel: '我要自己选',
+        applyLabel: 'OK',
+        fromLabel: 'From',
+        toLabel: 'To',
+        customRangeLabel: 'Custom',
         daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
         monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
         firstDay: 1

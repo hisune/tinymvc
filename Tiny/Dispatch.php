@@ -22,7 +22,11 @@ class Dispatch
         session_start();
         headers_sent() OR header('Content-Type: text/html; charset=utf-8');
 
-        list(Request::$controller, Request::$method, Request::$params) = $this->route();
+        if(php_sapi_name() == 'cli'){
+            list(Request::$controller, Request::$method, Request::$params) = $this->cliRoute();
+        }else{
+            list(Request::$controller, Request::$method, Request::$params) = $this->route();
+        }
 
         if(!is_null(Request::$controller) && !is_null(Request::$method)){
             if(!class_exists(Request::$controller)){
@@ -135,6 +139,26 @@ class Dispatch
             }
             return array($controller, $method, $pathInfo);
         }
+    }
+
+    public function cliRoute()
+    {
+        global $argv;
+        unset($argv['0']);
+        if(isset($argv['1'])){
+            $controller = $argv['1'];
+            unset($argv['1']);
+        }else{
+            $controller = 'index';
+        }
+        if(isset($argv['2'])){
+            $method = $argv['2'];
+            unset($argv['2']);
+        }else{
+            $method = 'index';
+        }
+        $controller = ucfirst(Config::$application) . '\\' . Config::$controller['0'] . '\\' . ucfirst($controller);
+        return array($controller, $method, $argv);
     }
 
 }

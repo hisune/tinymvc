@@ -37,7 +37,7 @@ class Auth
     public static function checkAdmin($controller)
     {
         if(!self::isLogin() || !self::isAdmin()){
-            if(isset($controller::$authWhite['admin']) && !in_array(Request::$method, $controller::$authWhite['admin'])){
+            if(!property_exists($controller, 'authWhite') || !isset($controller::$authWhite['admin']) || !in_array(Request::$method, $controller::$authWhite['admin'])){
                 Url::redirect(self::$login);
             }
         }

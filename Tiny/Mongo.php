@@ -13,17 +13,17 @@ class Mongo
     public static $db; // db对象
 
     public $key = '_id'; // 主键
-    protected $name; // 配置数组key
+    protected $name = 'mongodb'; // 配置数组key
     public $_data; // 你懂的
     protected $table; // 表名
     public $collection; // collection
 
-    public function __construct($name = 'mongodb')
+    public function __construct()
     {
         // 设置当前model的表名
         $this->_setTableName();
         // 连接数据库
-        $this->_loadDatabase($name);
+        $this->_loadDatabase();
     }
 
     public function __set($key, $value)
@@ -31,10 +31,8 @@ class Mongo
         $this->_data[$key] = $value;
     }
 
-    private function _loadDatabase($name = 'mongodb')
+    private function _loadDatabase()
     {
-        $this->name = $name;
-
         if (!isset(self::$db[$this->name])) {
             $config = Config::config()->{$this->name};
             if(!is_array($config))
@@ -85,13 +83,7 @@ class Mongo
 
     private function _parseName($name, $type = 0)
     {
-        if ($type) {
-            return ucfirst(preg_replace_callback('/_([a-zA-Z])/', function ($match) {
-                return strtoupper($match[1]);
-            }, $name));
-        } else {
-            return strtolower(trim(preg_replace('/[A-Z]/', '_\\0', $name), '_'));
-        }
+        return Helper::parseName($name, $type);
     }
 
     // 获取主键

@@ -96,42 +96,7 @@ class Html
 
     public static function loading()
     {
-        $html = self::tag(
-            'div',
-            '',
-            array(
-                'class'         => 'progress-bar',
-                'role'          => 'progressbar',
-                'aria-valuenow' => '100',
-                'aria-valuemin' => '0',
-                'aria-valuemax' => '100',
-                'style'         => 'width: 100%',
-            )
-        );
-        $html = self::tag(
-            'div',
-            $html,
-            array(
-                'class' => 'progress progress-striped active',
-                'style' => 'margin:15px 50px',
-            )
-        );
-        $html .= self::tag(
-            'p',
-            '正在努力加载页面 o(>﹏<)o',
-            array(
-                'style' => 'margin-top: 12px'
-            )
-        );
-        $html = self::tag(
-            'div',
-            $html,
-            array(
-                'class' => 'alert alert-info width-350 text-center',
-            )
-        );
-
-        return $html;
+        return self::tag('i', '', array('class' => 'fa fa-refresh fa-spin')) . ' Loading...';
     }
 
     // success, info, warning, danger

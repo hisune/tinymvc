@@ -58,7 +58,7 @@ class ORM
     public static $prefix; // 表前缀
 
     public $key = 'id'; // 主键
-    protected $name; // 配置数组key
+    protected $name = 'database'; // 配置数组key
     public $_data; // 你懂的
     protected $table; // 表名
     protected $options; // 操作对象
@@ -73,13 +73,10 @@ class ORM
     protected $createdAt = true; // 打开确保数据库里有这个字段，且为timestamp类型
     protected $timeType = 'timestamp';
 
-    /*
-     * @param $name string config array key 在初始化的时候可以进行数据库的切换
-     */
-    public function __construct($name = 'database')
+    public function __construct()
     {
         // 连接数据库，lazy load
-        $this->_loadDatabase($name);
+        $this->_loadDatabase();
         // 设置当前model的表名
         $this->_setTableName();
     }
@@ -122,10 +119,8 @@ class ORM
     /**
      * Load database connection
      */
-    private function _loadDatabase($name = 'database')
+    private function _loadDatabase()
     {
-        $this->name = $name;
-
         if (!isset(self::$db[$this->name])) {
             $config = Config::config()->{$this->name};
             if(!is_array($config))
@@ -442,13 +437,7 @@ class ORM
 
     private function _parseName($name, $type = 0)
     {
-        if ($type) {
-            return ucfirst(preg_replace_callback('/_([a-zA-Z])/', function ($match) {
-                return strtoupper($match[1]);
-            }, $name));
-        } else {
-            return strtolower(trim(preg_replace('/[A-Z]/', '_\\0', $name), '_'));
-        }
+        return Helper::parseName($name, $type);
     }
 
     // 获取主键
