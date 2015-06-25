@@ -12,7 +12,10 @@ abstract class Cli
     protected $dayStart;
     protected $dayEnd;
 
-    public function __construct() {}
+    public function __construct() {
+        if(php_sapi_name() != 'cli')
+            Error::printError('sapi forbidden');
+    }
 
     public function initialize() {}
 
@@ -24,7 +27,7 @@ abstract class Cli
         }else{
             $this->dayStart = strtotime($date);
             $this->dayEnd = $this->dayStart + 86400;
-            if($this->dayStart < 1000000000 || $this->dayStart % 86400 != 0){
+            if($this->dayStart < 1000000000 || date('His', $this->dayStart) != '000000'){
                 Error::echoJson(-1, 'day format error');
             }
         }

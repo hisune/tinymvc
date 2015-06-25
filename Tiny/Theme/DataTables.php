@@ -78,8 +78,10 @@ class DataTables implements tiny\ThemeBuilder
         // dataTable底部
         $this->html .= tiny\Html::tag(
             'div',
-            '<div class="row"><div class="col-sm-12"><div class="pull-left" id="' . $this->id . '-page-left"></div>
-                <div class="pull-right" id="' . $this->id . '-page-right"></div></div></div>',
+            '<div class="row">
+                <div class="col-sm-6" id="' . $this->id . '-page-left"></div>
+                <div class="col-sm-6" style="text-align: right;" id="' . $this->id . '-page-right"></div>
+                </div>',
             array(
                 'class' => 'box-footer'
             )
@@ -159,10 +161,10 @@ class DataTables implements tiny\ThemeBuilder
                                     if($row->{$name} && $this->model->type == 'mongodb'){
                                         $row->{$name} = $row->{$name}->sec;
                                     }
-                                    $tmp[] = $row->{$name} ? date('Y-m-d H:i:s', $row->{$name}) : '-';
+                                    $tmp[] = $row->{$name} ? date('Y-m-d H:i:s', strpos($row->{$name}, '-') === false ? $row->{$name} : strtotime($row->{$name})) : '-';
                                     break;
                                 case 'date_short':
-                                    $tmp[] = $row->{$name} ? date('Y-m-d', $row->{$name}) : '-';
+                                    $tmp[] = $row->{$name} ? date('Y-m-d', strpos($row->{$name}, '-') === false ? $row->{$name} : strtotime($row->{$name})) : '-';
                                     break;
                                 case 'enum':
                                     $tmp[] = isset($column['enum'][$row->{$name}]) ? $column['enum'][$row->{$name}] : '?(' . $row->{$name}. ')';
@@ -616,7 +618,7 @@ class DataTables implements tiny\ThemeBuilder
         $before = (isset($this->setting['before']) && is_string($this->setting['before'])) ? $this->setting['before'] : '';
         $after = (isset($this->setting['after']) && is_string($this->setting['after'])) ? $this->setting['after'] : '';
 
-        return $before . '<table class="table table-striped table-hover">' . $head . $body . $foot . '</table>' . $after;
+        return $before . '<div class="table-responsive"><table class="table table-striped table-hover">' . $head . $body . $foot . '</table></div>' . $after;
     }
 
     private function _show()
@@ -752,8 +754,8 @@ function dataTablesSubmit(exp){
                             if (i > json.msg.page) break;
                             pageNav += '<li' + (json.msg.current == i ? ' class="active"' : '') + ' name="' + i + '" onclick="goPage($(this))"><a>' + i + '</a></li>';
                         }
-                        \$('#{$this->id}-page-right').html('<ul class="pagination" style="margin:0;">' +
-                            '<span style="margin-left: 10px;" class="data-tables-jump">Jump: <input type="text" class="form-control input-sm data-tables-submit" style="display: inline-block; width: 50px;" name="_page[current]" onchange="dataTablesSubmit();" value="' + json.msg.current + '"/></span>' +
+                        \$('#{$this->id}-page-right').html('<nav><ul class="pagination" style="margin:0;">' +
+                            '<li style="margin-left: 10px;" class="data-tables-jump">Jump: <input type="text" class="form-control input-sm data-tables-submit" style="display: inline-block; width: 50px;" name="_page[current]" onchange="dataTablesSubmit();" value="' + json.msg.current + '"/></li>' +
                             '<li class="first' + (json.msg.current == 1 ? ' disabled' : '') + '" name="first" onclick="goPage($(this))">' +
                             '<a>First</a></li>' +
                             '<li class="prev' + (json.msg.current == 1 ? ' disabled' : '') + '" name="prev" onclick="goPage($(this))">' +
@@ -763,7 +765,7 @@ function dataTablesSubmit(exp){
                             '</li>' +
                             '<li class="last' + (json.msg.current * json.msg.per >= json.msg.total ? ' disabled' : '') + '" name="' + json.msg.page + '" onclick="goPage($(this))">' +
                             '<a>Last</a>' +
-                            '</li></ul>');
+                            '</li></ul></nav>');
                     }else{ // 不分页
                         \$("#{$this->id}-page-left").html('Total ' + json.msg.total + ' rows');
                     }
@@ -829,11 +831,11 @@ JS;
     ranges: {
         //'今日': [moment(), moment()],
         //'昨日': [moment().subtract('days', 1), moment().subtract('days', 1)],
-        '最后1日': [moment().subtract('days', 1), moment()],
-        '最后7日': [moment().subtract('days', 6), moment()],
-        '最后30日': [moment().subtract('days', 29), moment()],
-        '这个月': [moment().startOf('month'), moment().endOf('month')],
-        '上个月': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+        'The last 1 day': [moment().subtract('days', 1), moment()],
+        'The last 7 day': [moment().subtract('days', 6), moment()],
+        'The last 30 day': [moment().subtract('days', 29), moment()],
+        'This month': [moment().startOf('month'), moment().endOf('month')],
+        'Last month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
     },
     buttonClasses: ['btn btn-default'],
     applyClass: 'btn-small btn-primary',
