@@ -107,6 +107,11 @@ class Auth
         }
 
         $purview = self::getPurviewCache();
+        if(!$purview && Config::$authPurviewMethod){
+            $class = Config::$authPurviewMethod['0'];
+            $call = Config::$authPurviewMethod['1'];
+            $class::$call();
+        }
 
         $white = property_exists($ctr, 'authWhite') && isset($ctr::$authWhite['purview']) ? $ctr::$authWhite['purview'] : array();
         if(
