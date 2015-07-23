@@ -1,13 +1,14 @@
 Hisune Tiny MVC Framework
 =========
 * 简约为原则的高性能框架，包含：路由，ORM，cookie，session，view，validation，简单权限验证，cache等等。
-* Author: Hisune(http://hisune.com)
+* 自动生成增删改查代码(themeBuilder)
+* 支持Mysql && Mongodb
 * 示例程序：https://github.com/hisune/tinymvc-demo
 * 示例网站：http://hisune.com
 
 安装方法
 =========
-* 下载`composer.json`到任意目录，`cd`到`composer.json`所在目录，执行`composer install`
+* 执行`composer create-project hisune/tinymvc-demo 2.2`
 * composer帮助：(https://getcomposer.org)  
 > linux：  
 > `curl -sS https://getcomposer.org/installer | php`  
@@ -148,208 +149,8 @@ Theme Builder介绍
 > multiselect         https://github.com/davidstutz/bootstrap-multiselect
 
 * 怎么使用？  
-Controller中加入action成员属性，例如：
-```php
-　　protected $actionTabs = array(
-　　	'type' => 'theme',
-　　	'name' => 'Tabs',
-　　);
-```
-Helper中加入getSetting方法，例如：
-```php
-public static function getTabsSetting()
-```
+> 安装完成后访问：/themeBuilder
 
-* Tabs参数配置：
-> id: 唯一id，数字或字母，如未配置将随机生成，可选  
-> js: 附加js代码，可选  
-> tabs: 菜单数组，包括title（标题）,url（ajax内容url），必须
-
-* Datatables参数配置：
-```php
-id: 唯一id，数字或字母，如未配置将随机生成，可选
-js: 附加js代码，可选
-model: 指定模型名称，可选
-export: 是否可到处，可选，默认为false
-page: 默认分页条数，可选，默认为10，false时表示不分页。可能数值：10, 25, 50, 100
-title: panel的head附加html，可选，默认为空。通常用在无分页表格时的说明
-before: 表格前附加html，可选，默认为空
-after: 表格后附加html，可选，默认为空
-default: 默认配置参数，可选
-　　filter: 默认过滤条件，string类型，可选。例如：i.select > 10
-　　group: 默认过滤条件，string类型，可选。
-　　having: 默认过滤条件，string类型，可选。
-join: 链表查询，可选
-　　main: 主表别名，string类型，必须。
-　　on: 链表数组，必须。例如：
-　　array(
-　　	'main' => 'i',
-　　	'on' => array(
-　　		array('type' => 'inner' , 'join' => '__JOIN__ j on i.id = j.index_id'),
-　　		array('type' => 'left' , 'join' => '__JOIN_TEST__ t on j.id = t.join_id'),
-　　	),
-　　)
-　　type: 链表方式，left,right,inner，必须
-　　hoin: 链表语句，必须
-column: 内容数组，包括显示字段配置及过滤配置，必须
-　　title: 标题，必须
-　　name: 数据库中的字段名，可选
-　　alias: 字段的别名，可选
-　　sort: 是否排序，可指定默认排序，例如'sort' => 'desc'，一般来说只允许一个字段配置默认排序，可选
-　　tips: 字段说明，将显示在thead的th中，可选
-　　call: 查询出来的数据执行什么函数，可选。内置函数有enum(键值对，需配置enum参数), date(标准时间), date_sort(日期)
-　　display: 是否在前端显示该字段，可选，默认true。如果为false，call参数将无效
-　　filter: 是否可过滤该字段，可选，详细配置：
-　　所有type均可配置call参数(辅助过滤函数)，例如配置'call' => 'callTest'，需在helper中定义：public static function dataTablesFilterCallTest($post, &$whereStr, &$whereBind)。
-　　'type' => 'hidden':
-　　value: 默认过滤值，可选，可用来替换datatables的default filter
-　　'type' => 'range':
-　　width: 输入框长度，可选，单位为px，默认70
-　　value: 默认过滤值，可选，如：1~100
-　　'type' => 'input':
-　　width: 输入框长度，可选，单位为px，默认110
-　　value: 默认过滤值，可选
-　　title: 输入框的placeholder，可选，默认为column的title
-　　like: 是否可模糊查询，可选，默认否
-　　'type' => 'date_range':
-　　width: 输入框长度，可选，单位为px，默认230
-　　value: 默认过滤值，可选，如：2014-10-02 ~ 2014-10-08
-　　title: 输入框的placeholder，可选，默认为column的title
-　　format: 日期格式，可选，默认YYYY-MM-DD HH:mm
-'type' => 'date':
-　　width: 输入框长度，可选，单位为px，默认230
-　　value: 默认过滤值，可选，如：2014-10-02 ~ 2014-10-08
-　　title: 输入框的placeholder，可选，默认为column的title
-　　format: 日期格式，可选，默认YYYY-MM-DD HH:mm
-'type' => 'select':
-　　value: 默认过滤值，可选
-　　option: option数组key-value键值对，必须
-　　filter: option是否可前端过滤，可选，默认false
-　　height: 前端select最大高度，可选，默认400
-```
-
-* helper中的辅助函数
-> dataTablesPostBefore: post数据时的前置函数，通常用来处理用户输入数据，例如安全过滤，验证等，可选；  
-> 函数原型：public static function dataTablesPostBefore(&$post)。  
->  
-> dataTablesPostAfter: post数据时的后置函数，通常用来处理返回数据；  
-> 函数原型：public static function dataTablesPostAfter(&$msg)。  
->  
-> 所有字段都可配置call参数(辅助输出函数)，例如配置'call' => 'callTest'；  
-> 需在helper中定义：public static function dataTablesShowRenderCallTest($row)，需返回显示内容。
-
-* datatables完整配置示例：
-```php
-public static function getDataTablesSetting()
-{
-    return array(
-        'id' => '',
-        'js' => '',
-        'export' => true,
-        'page' => 25,
-        'title' => '',
-        'default' => array(
-            'filter' => 'i.select > 0', // 默认过滤参数
-            'group' => '',
-            'having' => '',
-        ),
-        'before' => 'xx',
-        'after' => 'oo',
-        'column' => array(
-            array(
-                'title' => 'hidden测试',
-                'name' => 'i.hidden',
-                'alias' => 'hidden',
-                'filter' => array(
-                    'type' => 'hidden',
-                    'call' => 'callHidden', // 当前helper中定义call函数$post, &whereStr, &$whereBind
-                ),
-                'display' => false
-            ),
-            array(
-                'title' => 'range测试',
-                'name' => 't.range',
-                'filter' => array(
-                    'type' => 'range',
-                    'width' => '50',
-                )
-            ),
-            array(
-                'title' => 'input测试',
-                'name' => 'j.input',
-                'sort' => true,
-                'filter' => array(
-                    'type' => 'input',
-                    'like' => true,
-                ),
-                'call' => 'renderInput',
-            ),
-            array(
-                'title' => 'date-range',
-                'name' => 'i.date_range',
-                'filter' => array(
-                    'type' => 'date_range',
-                    'width' => '100',
-                ),
-                'call' => 'date',
-            ),
-            array(
-                'title' => 'date-time',
-                'name' => 'i.date',
-                'filter' => array(
-                    'type' => 'date',
-                ),
-            ),
-            array(
-                'title' => '测试',
-                'name' => 'i.select',
-                'sort' => 'asc',
-                'filter' => array('type' => 'select', 'filter' => false, 'option' => array(1 => 'test1', 2 => 'test2')),
-                'call' => 'enum',
-                'enum' => array(1 => 'test1', 2 => 'test2'),
-            ),
-            array(
-                'title' => '操作',
-                'tips' => 'tips测试',
-                'call' => 'renderTest', // 不带name的call只有一个参数，即当前结果行
-            ),
-        ),
-        'model' => 'Index',
-        'join' => array(
-            'main' => 'i',
-            'on' => array(
-                array('type' => 'left', 'join' => '__JOIN__ j on i.id = j.index_id'),
-                array('type' => 'left', 'join' => '__JOIN_TEST__ t on j.id = t.join_id'),
-            ),
-        ),
-    );
-}
-
-// 前置post函数，$post为查询数据
-public static function dataTablesPostBefore(&$post)
-{
-
-}
-
-// 后置post函数，$msg为返回数据
-public static function dataTablesPostAfter(&$msg)
-{
-
-}
-
-// 辅助过滤函数，$post为查询数据，$whereStr为查询语句string，$whereBind为查询语句绑定变量数组
-public static function dataTablesFilterCallHidden($post, &$whereStr, &$whereBind)
-{
-
-}
-
-// 辅助输出函数，$row为当前结果行
-public static function dataTablesShowRenderTest($row)
-{
-    return $row->hidden;
-}
-　　
-```
 About
 ========
 **Created by Hisune [lyx](http://hisune.com)**
