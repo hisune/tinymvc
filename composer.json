@@ -13,5 +13,10 @@
             "homepage": "http://hisune.com/",
             "role": "Founder and project lead"
         }
-    ]
+    ],
+	"autoload": {
+        "psr-0": {
+            "Tiny": "."
+        }
+     }
 }
