@@ -151,7 +151,7 @@ Theme Builder介绍
 * 怎么使用？  
 > 安装完成后访问：/themeBuilder
 
-* 示例(AdminLTE)
+* 示例(使用Hisune tinyMVC 开发的AdminLTE后台示例)
 themeBuilder 之 dataTable
 ![admin panel](https://raw.githubusercontent.com/hisune/images/master/tinymvc_admin_1.jpg)
 themeBuilder 之 mod
