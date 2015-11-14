@@ -17,7 +17,7 @@ class Cookie
         'path' => '/',
         'domain' => null,
         'secure' => null,
-        'httponly' => null,
+        'httponly' => true,
     );
 
     /**
