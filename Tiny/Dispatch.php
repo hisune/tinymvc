@@ -86,7 +86,7 @@ class Dispatch
             return array(ucfirst(Config::$application) . '\\' . Config::$controller['0'] . '\\Index', 'index', array());
         else{ // 需要路由分发处理
             if($this->route->routes) { // 有配置路由规则
-                if(isset($this->route->routes[$pathInfo['0']])){ // 普通的子模块目录重写
+                if(isset($this->route->routes[$pathInfo['0']]) && is_string($this->route->routes[$pathInfo['0']])){ // 普通的子模块目录重写
                     $class = isset($pathInfo['1']) ? preg_replace("/[^0-9a-z_]/i", '', $pathInfo['1']) : 'index';
                     $method = isset($pathInfo['2']) ? preg_replace("/[^0-9a-z_]/i", '', $pathInfo['2']) : 'index';
                     $controller = ucfirst(Config::$application) . '\\' . Config::$controller['0'] . '\\' . ucwords($this->route->routes[$pathInfo['0']]) . '\\' . ucwords($class);
