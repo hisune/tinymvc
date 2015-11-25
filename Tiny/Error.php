@@ -9,16 +9,27 @@ namespace Tiny;
 
 class Error
 {
-    public static function logMessage($message)
+    const DEFAULT_LOG_DIR = 'Log';
+
+    public static function logMessage($message, $logDir = true)
     {
+        $logDir = is_string($logDir) ? $logDir : self::DEFAULT_LOG_DIR;
         $path = Config::$varDir;
         if(!file_exists($path)) mkdir($path);
-        $path .= 'Log/';
+        $path .= $logDir . '/';
         if(!file_exists($path)) mkdir($path);
         $path .= date('Y-m-d') . '.log';
 
+        if(is_array($message)){
+            foreach($message as $k => $v)
+                if(is_array($v))
+                    $message[$k] = json_encode($v);
+
+            $message = implode("\t", $message);
+        }
+
         // Append date and IP to log message
-        return error_log(date('H:i:s ') . getenv('REMOTE_ADDR') . " $message\n", 3, $path);
+        return error_log(date('Y-m-d H:i:s ') . "\t" . getenv('REMOTE_ADDR') . "\t{$message}\n", 3, $path);
     }
 
     public static function printException($e, $addOn = null)
@@ -52,9 +63,14 @@ class Error
         echo 'Ooooops, page not found!';
     }
 
-    public static function echoJson($ret, $msg = '', $exit = true)
+    public static function echoJson($ret, $msg = '', $exit = true, $writeLog = false, $writeMessage = null)
     {
-        echo json_encode(array('ret' => $ret, 'msg' => $msg));
+        echo json_encode(array('ret' => $status, 'msg' => $data));
+        if($writeLog){
+            if(!$writeMessage)
+                $writeMessage = ['GET' => Request::get(), 'POST' => Request::post()];
+            static::logMessage($writeMessage, $writeLog);
+        }
         $exit && exit;
     }
 

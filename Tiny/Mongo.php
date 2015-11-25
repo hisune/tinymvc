@@ -31,6 +31,11 @@ class Mongo
         $this->_data[$key] = $value;
     }
 
+    public function __get($name)
+    {
+        return isset($this->_data[$name]) ? $this->_data[$name] : null;
+    }
+
     private function _loadDatabase()
     {
         if (!isset(self::$db[$this->name])) {

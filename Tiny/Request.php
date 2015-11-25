@@ -55,6 +55,12 @@ class Request
         else return isset($_POST[$key]) ? (is_array($_POST[$key]) ? $_POST[$key] : trim($_POST[$key])) : NULL;
     }
 
+    public static function server($key = null)
+    {
+        if (is_null($key)) return $_SERVER;
+        else return isset($_SERVER[$key]) ? (is_array($_SERVER[$key]) ? $_SERVER[$key] : trim($_SERVER[$key])) : NULL;
+    }
+
     // 当前请求的url
     public static function url()
     {
