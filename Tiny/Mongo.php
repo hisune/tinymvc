@@ -43,11 +43,15 @@ class Mongo
             if(!is_array($config))
                 throw new \Exception ($config . ' not a valid db config');
             // Load database
-            $config['option'] = isset($config['option']) ? $config['option'] : array();
             try{
-                $db = new \MongoClient('mongodb://' . $config['host'] . ':' . $config['port'], $config['option']);
+                if(isset($config['dns'])){
+                    $db = new \MongoClient($config['dns']);
+                }else{
+                    $config['option'] = isset($config['option']) ? $config['option'] : array(); // option对dns无效
+                    $db = new \MongoClient('mongodb://' . $config['host'] . ':' . $config['port'], $config['option']);
+                }
             }catch (\Exception $e){
-                throw new \Exception ('connection mongodb failed');
+                throw new \Exception ('connection mongodb failed.' . json_encode($config));
             }
             if(!isset($config['db'])){
                 throw new \Exception ('empty mongodb db set');

@@ -146,6 +146,11 @@ class UserAgent
         return preg_match('/[\d\.]{7,15}/', $_SERVER['REMOTE_ADDR'], $matches) ? $matches [0] : '';
     }
 
+    public static function lang()
+    {
+        return strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2));
+    }
+
     private static function _userAgentMatch($ua, $tokens){
 
         foreach ($tokens as $token){

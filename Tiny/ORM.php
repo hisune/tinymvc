@@ -182,6 +182,25 @@ class ORM
     }
 
     /**
+     * // For example:
+     * $model->increment('foo', 1);
+     * // Similarly:
+     * $model->increment(['foo' => -1, 'bar' => 5]);
+     */
+    public function increment($increment = null, $value = null)
+    {
+        if(!isset($this->options['increment']))  $this->options['increment'] = array();
+
+        if(is_string($increment) && is_numeric($value))
+            $this->options['increment'][$increment] = $value;
+        elseif(is_array($increment) && is_null($value))
+            foreach($increment as $k => $v)
+                if(is_string($k) && is_numeric($v))
+                    $this->options['increment'][$k] = $v;
+        return $this;
+    }
+
+    /**
      * 按主键查找一条记录，用链式操作
      */
     public function findOne($id = NULL)
@@ -252,13 +271,25 @@ class ORM
     public function update($data = null, $all = false)
     {
         if (is_null($data)) $data = $this->_data;
-        if (!$data) return NULL;
+        if (!$data && !isset($this->options['increment'])) return NULL;
 
         $this->updatedAt && $data['updated_at'] = $this->_getTime();
 
-        $columns = implode('` = ?, `', array_keys($data));
+        if($data)
+            $columns = '`' . implode('` = ?, `', array_keys($data)). '` = ?,';
+        else
+            $columns = '';
 
-        $sql = 'UPDATE ' . $this->getTableName() . ' SET `' . $columns . '` = ? WHERE ';
+        $increment = '';
+        if(isset($this->options['increment']) && $this->options['increment']) {
+            foreach ($this->options['increment'] as $field => $value)
+                $increment .= "`{$field}` = `$field` + {$value},";
+            $increment = rtrim($increment, ',');
+        }else{
+            $columns = rtrim($columns, ',');
+        }
+
+        $sql = 'UPDATE ' . $this->getTableName() . ' SET ' . $columns . $increment . ' WHERE ';
 
         $params = array();
         // 如果有设置主键
@@ -274,7 +305,7 @@ class ORM
             return NULL;
         }
 
-        if ($statement = $this->execute($sql . $where, array_merge(array_values($data), $params)))
+        if ($statement = $this->execute($sql . $where, $data ? array_merge(array_values($data), $params) : $params))
             return $statement->rowCount();
         else
             return NULL;
