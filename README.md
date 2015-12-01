@@ -90,8 +90,8 @@ ORM介绍
 > 支持主从读写分离，支持主从随机读取；  
 > 对于直接执行原生sql语句，主库用execute，从库用query，原生sql也支持变量绑定  
 > 支持prefix  
-> 支持变量绑定的函数有：where,group,having,order，第一个参数为string，第二个参数为绑定变量数组  
-> 不支持变量绑定的函数有：field,table,join,limit，只支持一个string参数(limit除外)。limit会对传入的值强行intval，防止后端分页没有处理用户输入的安全隐患  
+> 支持变量绑定的函数有：where，第一个参数为string，第二个参数为绑定变量数组  
+> 不支持变量绑定的函数有：field,group,having,order,table,join,limit，只支持一个string参数(limit除外)。limit会对传入的值强行intval，防止后端分页没有处理用户输入的安全隐患  
 > 对于链式操作，会在table和join中自动加入prefix，指定表的情况：__TABLE_NAME__会转成：pre_table_name  
 > 对于query和execute不支持自动加入prefix，由于本身就是原生sql语句，直接写表名即可
 
@@ -115,6 +115,7 @@ ORM介绍
  save([array $data], [boolean $replace]) // C
  update([array $data], [boolean $all]) // U，慎用all
  delete([int $id], [boolean $all]) // D，慎用all
+ increment(string $column, [int $value]);
  query(string $sql, [array $param], [boolean $fetchAll])
  execute(string $sql, [array $param])
 ```
