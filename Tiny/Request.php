@@ -61,6 +61,11 @@ class Request
         else return isset($_SERVER[$key]) ? (is_array($_SERVER[$key]) ? $_SERVER[$key] : trim($_SERVER[$key])) : NULL;
     }
 
+    public static function rawBody()
+    {
+        return file_get_contents('php://input');
+    }
+
     // 当前请求的url
     public static function url()
     {
