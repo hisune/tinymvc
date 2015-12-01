@@ -63,9 +63,9 @@ class Error
         echo 'Ooooops, page not found!';
     }
 
-    public static function echoJson($ret, $msg = '', $exit = true, $writeLog = false, $writeMessage = null)
+    public static function echoJson($status, $data = '', $exit = true, $writeLog = false, $writeMessage = null)
     {
-        echo json_encode(array('ret' => $status, 'msg' => $data));
+        echo json_encode(array('status' => $status, 'data' => $data));
         if($writeLog){
             if(!$writeMessage)
                 $writeMessage = ['GET' => Request::get(), 'POST' => Request::post()];
