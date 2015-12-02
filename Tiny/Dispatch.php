@@ -19,8 +19,7 @@ class Dispatch
 
     public function controller()
     {
-        session_start();
-        headers_sent() OR header('Content-Type: text/html; charset=utf-8');
+        @session_start();
 
         if(php_sapi_name() == 'cli'){
             list(Request::$controller, Request::$method, Request::$params) = $this->cliRoute();

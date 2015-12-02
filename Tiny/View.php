@@ -53,6 +53,7 @@ class View
         }else
             $content = $this->_getContent($tpl);
         $this->addToken($content);
+        headers_sent() || header('Content-Type: text/html; charset=utf-8');
         echo $content;
     }
 

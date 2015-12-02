@@ -36,6 +36,7 @@ class Error
     {
         $detail = Html::tag('b', get_class($e), array('style' => 'color: #990000'));
         if(Config::config()->show_error){
+            headers_sent() OR header('HTTP/1.0 500 Internal Server Error');
             $detail .= Html::tag('p', $e->getMessage());
             $detail .= Html::tag('p', Html::tag('b', $e->getFile()) . '(line ' . $e->getLine() . ')');
             $addOn && $detail .= HTML::tag('p', $addOn);
@@ -65,6 +66,7 @@ class Error
 
     public static function echoJson($status, $data = '', $exit = true, $writeLog = false, $writeMessage = null)
     {
+        headers_sent() || header('Content-Type: application/json; charset=utf-8');
         echo json_encode(array('status' => $status, 'data' => $data));
         if($writeLog){
             if(!$writeMessage)

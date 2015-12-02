@@ -15,6 +15,7 @@ class Request
     public static $controller;
     public static $method;
     public static $params;
+    public static $rowBody = null;
 
     /**
      * Is this a GET request?
@@ -63,7 +64,10 @@ class Request
 
     public static function rawBody()
     {
-        return file_get_contents('php://input');
+        if(is_null(static::$rowBody))
+            static::$rowBody = file_get_contents('php://input');
+
+        return static::$rowBody;
     }
 
     // 当前请求的url

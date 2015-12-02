@@ -10,11 +10,6 @@ namespace Tiny;
 class Exception
 {
 
-    public static function header()
-    {
-        headers_sent() OR header('HTTP/1.0 500 Internal Server Error');
-    }
-
     public static function fatal()
     {
         if($e = error_get_last())
@@ -28,15 +23,16 @@ class Exception
 
         try{
             Error::logMessage($message);
-            self::header();
 
             Error::printException($e, $addOn);
         }catch(\Exception $e){
-            print $message;
+            if(Config::config()->show_error)
+                print $message;
         }
 
         exit(1);
     }
+
 }
 
 // END
