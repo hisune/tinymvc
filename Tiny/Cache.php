@@ -130,6 +130,9 @@ class Cache
     {
         $instance = self::getInstance();
         $fileNmae = $instance->_idToFileName($id);
+        if(!file_exists(self::cacheDir()))
+            mkdir(self::cacheDir());
+
         return self::cacheDir() . $fileNmae;
     }
 
