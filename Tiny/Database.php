@@ -73,6 +73,9 @@ class Database
         return $this->_runPdo($sql, $params, 'master');
     }
 
+    /**
+     * @return \PDOStatement
+     */
     private function _runPdo($sql, $params, $type)
     {
         $time = microtime(TRUE);

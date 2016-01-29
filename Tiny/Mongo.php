@@ -16,6 +16,7 @@ class Mongo
     protected $name = 'mongodb'; // 配置数组key
     public $_data; // 你懂的
     protected $table; // 表名
+    /* @var $collection \MongoCollection */
     public $collection; // collection
 
     public function __construct()

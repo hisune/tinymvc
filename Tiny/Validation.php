@@ -200,6 +200,16 @@ class Validation
     }
 
 
+    protected function json_rule($data, $validateEmpty = null)
+    {
+        $decode = json_decode($data, true);
+        if(!$validateEmpty)
+            return is_array($decode);
+        else
+            return is_array($decode) && count($decode) > 0;
+    }
+
+
     /**
      * Verify value is a string.
      *

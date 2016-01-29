@@ -5,8 +5,14 @@
  * Date: 14-7-10
  * Time: 下午12:59
  */
+
 namespace Tiny;
 
+/**
+ * @property $view \Tiny\View
+ * @property $request \Tiny\Request
+ * @property $validation \Tiny\Validation
+ */
 abstract class Controller
 {
 

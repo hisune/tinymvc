@@ -50,8 +50,19 @@
  * where第一参数支持array，此时第二参数无效；第一参数为array时，不支持别名，别名请用string；只支持绑定条件变量。
  * limit支持string类似，limit('0, 10')，或双参数类似，limit(0, 10)
  */
+
 namespace Tiny;
 
+/**
+ * @method ORM field(string $field, array $param = array())
+ * @method ORM table(string $table)
+ * @method ORM alias(string $alias)
+ * @method ORM where(string $where, array $param = array())
+ * @method ORM having(string $having)
+ * @method ORM group(string $group)
+ * @method ORM order(string $order)
+ * @method ORM limit(mixed $skip, int $limit = null)
+ */
 class ORM
 {
     public $type = 'mysql';
@@ -65,7 +76,7 @@ class ORM
     protected $options; // 操作对象
     protected $prepareParam = array(); // 预处理数组
 
-    private $methods = array('field', 'table', 'alias', 'where', 'having', 'group', 'having', 'order', 'limit'); // 链式操作方法
+    private $methods = array('field', 'table', 'alias', 'where', 'having', 'group', 'order', 'limit'); // 链式操作方法
     private $multiMethods = array('join'); // 支持多次执行的链式操作方法
     private $count = array('count', 'max', 'avg', 'min', 'sum', 'distinct'); // 单字段的统计方法
     private $selectSql = 'SELECT %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%%ORDER%%LIMIT%';
@@ -136,6 +147,9 @@ class ORM
         return $this->getDb();
     }
 
+    /**
+     * @return \Tiny\Database
+     */
     public function getDb()
     {
         return self::$db[$this->name];

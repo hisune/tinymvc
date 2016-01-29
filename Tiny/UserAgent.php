@@ -136,21 +136,6 @@ class UserAgent
         return $out;
     }
 
-    public static function header()
-    {
-        if (!function_exists('getallheaders')) {
-            $headers = [];
-            foreach ($_SERVER as $name => $value) {
-                if (strtolower(substr($name, 0, 5)) == 'http_') {
-                    $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
-                }
-            }
-            return $headers;
-        } else {
-            return getallheaders();
-        }
-    }
-
     /**
      *  * 获取请求ip
      *  *
