@@ -11,7 +11,7 @@ class Error
 {
     const DEFAULT_LOG_DIR = 'Log';
 
-    public static function logMessage($message, $logDir = true, $time = null)
+    public static function logMessage($message, $logDir = true)
     {
         $logDir = is_string($logDir) ? $logDir : self::DEFAULT_LOG_DIR;
         $path = Config::$varDir;
@@ -29,7 +29,7 @@ class Error
         }
 
         // Append date and IP to log message
-        return error_log(date('Y-m-d H:i:s', $time) . "\t" . getenv('REMOTE_ADDR') . "\t{$message}\n", 3, $path);
+        return error_log(date('Y-m-d H:i:s') . "\t" . getenv('REMOTE_ADDR') . "\t{$message}\n", 3, $path);
     }
 
     public static function printException($e, $addOn = null)

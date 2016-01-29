@@ -9,9 +9,9 @@
 namespace Tiny;
 
 /**
- * @property $view \Tiny\View
- * @property $request \Tiny\Request
- * @property $validation \Tiny\Validation
+ * @property \Tiny\View $view
+ * @property \Tiny\Request $request
+ * @property \Tiny\Validation $validation
  */
 abstract class Controller
 {
