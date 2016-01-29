@@ -29,7 +29,7 @@ class Error
         }
 
         // Append date and IP to log message
-        return error_log(date('Y-m-d H:i:s', $time) . "\t" . getenv('REMOTE_ADDR') . "\t{$message}\n", 3, $path);
+        return error_log(date('Y-m-d H:i:s', $time ? $time : time()) . "\t" . getenv('REMOTE_ADDR') . "\t{$message}\n", 3, $path);
     }
 
     public static function printException($e, $addOn = null)
