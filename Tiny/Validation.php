@@ -38,7 +38,7 @@ class Validation
     public $data;
 
     // Array of errors
-    public $errors = '';
+    public $errors = array();
 
     // The text to put before an error
     public $error_prefix = '<div class="alert alert-warning alert-dismissible" role="alert"><button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>';
@@ -161,7 +161,7 @@ class Validation
      *
      * @param string $rule
      * @param array $args
-     * @return this
+     * @return $this
      */
     public function __call($rule, $args)
     {
