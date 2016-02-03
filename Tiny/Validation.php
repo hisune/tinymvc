@@ -10,24 +10,25 @@
 namespace Tiny;
 
 /**
- * @method Validation json(mixed $data, boolean $validateEmpty = null) validate if data is a json string
- * @method Validation string(mixed $data) validate if data is a string
- * @method Validation array(mixed $data) validate if data is a array
- * @method Validation integer(mixed $data) validate if data is a integer
- * @method Validation date(mixed $data, string $format = 'Y-m-d H:i:s') validate if data is valid date string
- * @method Validation true(mixed $data, boolean $condition)
- * @method Validation options(mixed $data, array $options)
- * @method Validation ip(mixed $data)
- * @method Validation matches(mixed $data, string $field)
- * @method Validation email(mixed $data)
- * @method Validation word(mixed $data)
- * @method Validation plaintext(mixed $data)
- * @method Validation min(mixed $data, int $length)
- * @method Validation max(mixed $data, int $length)
- * @method Validation between(mixed $data, int $min, int $max)
- * @method Validation length(mixed $data, int $length)
- * @method Validation base64(mixed $data)
- * @method Validation equal(mixed $data)
+ * @method Validation json(string $errorTips, boolean $validateEmpty = null) validate if data is a json string
+ * @method Validation string(string $errorTips) validate if data is a string
+ * @method Validation array(string $errorTips) validate if data is a array
+ * @method Validation integer(string $errorTips) validate if data is a integer
+ * @method Validation date(string $errorTips, string $format = 'Y-m-d H:i:s') validate if data is valid date string
+ * @method Validation true(string $errorTips, boolean $condition)
+ * @method Validation options(string $errorTips, array $options)
+ * @method Validation ip(string $errorTips)
+ * @method Validation matches(string $errorTips, string $field)
+ * @method Validation email(string $errorTips)
+ * @method Validation word(string $errorTips)
+ * @method Validation plaintext(string $errorTips)
+ * @method Validation min(string $errorTips, int $length)
+ * @method Validation max(string $errorTips, int $length)
+ * @method Validation between(string $errorTips, int $min, int $max)
+ * @method Validation length(string $errorTips, int $length)
+ * @method Validation base64(string $errorTips)
+ * @method Validation equal(string $errorTips)
+ * @method Validation regular(string $errorTips, string $rule)
  */
 class Validation
 {
@@ -450,6 +451,11 @@ class Validation
     protected function equal_rule($field, $data)
     {
         return $field == $data;
+    }
+
+    protected function regular_rule($data, $rule)
+    {
+        return preg_match($rule, $data);
     }
 
     // 返回的错误验证
