@@ -9,6 +9,26 @@
  */
 namespace Tiny;
 
+/**
+ * @method Validation json(mixed $data, boolean $validateEmpty = null) validate if data is a json string
+ * @method Validation string(mixed $data) validate if data is a string
+ * @method Validation array(mixed $data) validate if data is a array
+ * @method Validation integer(mixed $data) validate if data is a integer
+ * @method Validation date(mixed $data, string $format = 'Y-m-d H:i:s') validate if data is valid date string
+ * @method Validation true(mixed $data, boolean $condition)
+ * @method Validation options(mixed $data, array $options)
+ * @method Validation ip(mixed $data)
+ * @method Validation matches(mixed $data, string $field)
+ * @method Validation email(mixed $data)
+ * @method Validation word(mixed $data)
+ * @method Validation plaintext(mixed $data)
+ * @method Validation min(mixed $data, int $length)
+ * @method Validation max(mixed $data, int $length)
+ * @method Validation between(mixed $data, int $min, int $max)
+ * @method Validation length(mixed $data, int $length)
+ * @method Validation base64(mixed $data)
+ * @method Validation equal(mixed $data)
+ */
 class Validation
 {
     // Current field
@@ -168,7 +188,7 @@ class Validation
      *
      * @param string $error message
      * @param boolean $string set to true if data must be string type
-     * @return boolean
+     * @return $this
      */
     public function required($error, $string = TRUE)
     {
@@ -180,6 +200,9 @@ class Validation
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function token($error)
     {
         if (Config::config()->token) {
@@ -253,11 +276,11 @@ class Validation
      * @param string $format of date string
      * @return boolean
      */
-    protected function date_rule($data, $format = NULL)
+    protected function date_rule($data, $format = 'Y-m-d H:i:s')
     {
         if($format)
         {
-            if($data = DateTime::createFromFormat($data, $format))
+            if($data = \DateTime::createFromFormat($format, $data))
             {
                 return TRUE;
             }
@@ -290,7 +313,7 @@ class Validation
      * @internal param array $array of posible values
      * @return boolean
      */
-    protected function options_rule($data, $options)
+    protected function options_rule($data, array $options)
     {
         return in_array($data, $options);
     }
