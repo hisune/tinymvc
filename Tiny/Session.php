@@ -11,6 +11,8 @@ class Session
 {
     public static function set($key, $value, $merge = false)
     {
+        if (session_id() === '') session_start();
+
         $name = Config::config()->flag . '_' . $key;
         if($value == null)
             unset($_SESSION[$name]);

@@ -19,8 +19,6 @@ class Dispatch
 
     public function controller()
     {
-        @session_start();
-
         if(php_sapi_name() == 'cli'){
             list(Request::$controller, Request::$method, Request::$params) = $this->cliRoute();
         }else{
