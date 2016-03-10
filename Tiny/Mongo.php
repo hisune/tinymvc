@@ -10,7 +10,8 @@ namespace Tiny;
 class Mongo
 {
     public $type = 'mongodb';
-    public static $db; // db对象
+    public static $db; // 当前db对象
+    public static $client; // mongo client
 
     public $key = '_id'; // 主键
     protected $name = 'mongodb'; // 配置数组key
@@ -43,21 +44,29 @@ class Mongo
             $config = Config::config()->{$this->name};
             if(!is_array($config))
                 throw new \Exception ($config . ' not a valid db config');
+
             // Load database
             try{
-                if(isset($config['dns'])){
-                    $db = new \MongoClient($config['dns']);
-                }else{
-                    $config['option'] = isset($config['option']) ? $config['option'] : array(); // option对dns无效
-                    $db = new \MongoClient('mongodb://' . $config['host'] . ':' . $config['port'], $config['option']);
+
+                $config['option'] = isset($config['option']) ? $config['option'] : array();
+
+                if(isset($config['dns']))
+                    $dsn = $config['dns'];
+                else
+                    $dsn = 'mongodb://' . $config['host'] . ':' . $config['port'];
+
+                if(!isset(self::$client[$dsn])){
+                    self::$client[$dsn]= new \MongoClient($dsn, $config['option']);
                 }
+
             }catch (\Exception $e){
                 throw new \Exception ('connection mongodb failed.' . json_encode($config));
             }
+
             if(!isset($config['db'])){
                 throw new \Exception ('empty mongodb db set');
             }
-            $db = $db->$config['db'];
+            $db = self::$client[$dsn]->$config['db'];
 
             $this->collection = $db->{$this->table};
             self::$db[$this->name] = $db;
