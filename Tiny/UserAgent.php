@@ -11,6 +11,13 @@ namespace Tiny;
 
 class UserAgent
 {
+    public static $ios = array(
+        'iphone',
+        'ipad',
+        'ipod',
+        'osx',
+    );
+
     public static function get($ua = null){
         is_null($ua) && $ua = $_SERVER['HTTP_USER_AGENT'];
         #
@@ -136,10 +143,25 @@ class UserAgent
         return $out;
     }
 
+    public static function header()
+    {
+        if (!function_exists('getallheaders')) {
+            $headers = [];
+            foreach ($_SERVER as $name => $value) {
+                if (strtolower(substr($name, 0, 5)) == 'http_') {
+                    $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                }
+            }
+            return $headers;
+        } else {
+            return getallheaders();
+        }
+    }
+
     /**
      *  * 获取请求ip
      *  *
-     *  * @return ip地址
+     *  * @return string ip地址
      *  */
     public static function ip()
     {

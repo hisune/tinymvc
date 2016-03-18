@@ -11,14 +11,20 @@ class Error
 {
     const DEFAULT_LOG_DIR = 'Log';
 
-    public static function logMessage($message, $logDir = true, $time = null)
+    public static function logMessage($message, $logDir = true, $time = null, $fileName = null)
     {
+        !$time && $time = time();
+
         $logDir = is_string($logDir) ? $logDir : self::DEFAULT_LOG_DIR;
         $path = Config::$varDir;
-        if(!file_exists($path)) mkdir($path);
+        if(!file_exists($path)) mkdir($path, 0777, true);
         $path .= $logDir . '/';
-        if(!file_exists($path)) mkdir($path);
-        $path .= date('Y-m-d') . '.log';
+        if(!file_exists($path)) mkdir($path, 0777, true);
+
+        if($fileName)
+            $path .= $fileName;
+        else
+            $path .= date('Y-m-d', $time) . '.log';
 
         if(is_array($message)){
             foreach($message as $k => $v)
@@ -29,10 +35,10 @@ class Error
         }
 
         // Append date and IP to log message
-        return error_log(date('Y-m-d H:i:s', $time ? $time : time()) . "\t" . getenv('REMOTE_ADDR') . "\t{$message}\n", 3, $path);
+        return error_log(date('Y-m-d H:i:s', $time) . "\t" . UserAgent::ip() . "\t{$message}\n", 3, $path);
     }
 
-    public static function printException($e, $addOn = null)
+    public static function printException(\Exception $e, $addOn = null)
     {
         $detail = Html::tag('b', get_class($e), array('style' => 'color: #990000'));
         if(Config::config()->show_error){
