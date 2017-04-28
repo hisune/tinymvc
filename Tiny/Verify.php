@@ -4,14 +4,8 @@
  * User: hi@hisune.com
  * Date: 14-7-16
  * Time: 下午8:10
- */
-
-/**
+ *
  * 创建gif动态验证码，支持颜色识别验证
- * Created by liuyuxuan.
- * QQ: 446127203
- * Date: 14-1-17
- * Time: 上午11:22
  *
  * 使用方法：
  * require_once('verify.php');
