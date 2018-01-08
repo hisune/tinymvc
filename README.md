@@ -1,4 +1,4 @@
-Hisune Tiny MVC Framework
+Hisune Tiny MVC Framework（此项目已经被弃用）
 =========
 * 简约为原则的高性能框架，包含：路由，ORM，cookie，session，view，validation，简单权限验证，cache等等。
 * 自动生成增删改查代码(themeBuilder)
